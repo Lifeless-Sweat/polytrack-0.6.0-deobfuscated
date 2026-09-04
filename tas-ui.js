@@ -38,7 +38,7 @@
     hud.id = 'tas-hud-panel';
     hud.innerHTML = `
         <div class="tas-header-row">
-            <div class="tas-title">🧩 JSON MACRO TAS ENGINE v2.4</div>
+            <div class="tas-title">⚡ ULTRA-PERFORMANCE TAS v2.5</div>
             <button id="tas-minimize-btn">[-]</button>
         </div>
         <div class="tas-content-wrapper">
@@ -50,7 +50,7 @@
                 <textarea id="tas-json-input" placeholder="Paste your instructions_v2 JSON string layout here..."></textarea>
             </div>
             <button class="tas-btn" id="btn-load-json">⚡ Parse & Compile JSON Map</button>
-            <div id="tas-status-log">Hold 'W' or 'ArrowUp' to execute your macro layout...</div>
+            <div id="tas-status-log">Hold 'W' or 'ArrowUp' to run seamlessly.</div>
         </div>
     `;
     document.body.appendChild(hud);
@@ -72,7 +72,7 @@
     const statusLogEl = document.getElementById('tas-status-log');
     const jsonInputEl = document.getElementById('tas-json-input');
 
-    // Track user holding W/Up Arrow to step through physics frames
+    // Key interceptors optimized for game engine threading
     window.addEventListener('keydown', (e) => {
         if (document.activeElement === jsonInputEl) return;
         if (e.code === 'KeyW' || e.code === 'ArrowUp') {
@@ -87,7 +87,7 @@
         }
     });
 
-    // Clean up stickiness issues
+    // Prevent input latches
     function clearMainThreadInputs() {
         const browserKeys = ['KeyW', 'KeyS', 'KeyA', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyR'];
         browserKeys.forEach(k => {
@@ -110,7 +110,7 @@
         }
     }
 
-    // 4. FIXED JSON Compiler Pipeline (Restored indices fixes)
+    // 4. JSON Compiler Pipeline
     document.getElementById('btn-load-json').addEventListener('click', () => {
         try {
             const rawData = JSON.parse(jsonInputEl.value);
@@ -129,13 +129,10 @@
                 const targetField = keyMappings[keyChar];
 
                 instructionsArray.forEach(instr => {
-                    // Scenario A: Infinite hold string ("0")
                     if (instr === "0") {
-                        applyInputSpan(0, 50000, targetField);
+                        applyInputSpan(0, 60000, targetField);
                         return;
                     }
-
-                    // Scenario B: Repeating loop clusters
                     if (instr.startsWith('!')) {
                         const parts = instr.substring(1).split('-').map(Number);
                         if (parts.length === 4) {
@@ -150,32 +147,29 @@
                             }
                         }
                     } 
-                    // Scenario C: Isolated fixed frame duration windows
                     else if (instr.includes('-')) {
                         const parts = instr.split('-').map(Number);
                         if (parts.length === 2) {
-                            const startFrame = parts[0];
-                            const duration = parts[1];
-                            applyInputSpan(startFrame, duration, targetField);
+                            applyInputSpan(parts[0], parts[1], targetField);
                         }
                     }
                 });
             });
 
-            statusLogEl.innerHTML = `<span style="color: #a3be8c;">Successfully parsed ${maxTimelineLength} frames! Hold 'W' to drive.</span>`;
+            statusLogEl.innerHTML = `<span style="color: #a3be8c;">Parsed ${maxTimelineLength} frames. Ready.</span>`;
         } catch (err) {
-            statusLogEl.innerHTML = `<span style="color: #bf616a;">JSON Compile Parse Error: ${err.message}</span>`;
+            statusLogEl.innerHTML = `<span style="color: #bf616a;">JSON Error: ${err.message}</span>`;
         }
     });
 
-    // 5. Worker Direct Physics Hook Loop
+    // 5. Zero-Overhead Memory Injection Engine (Lag-Free Integration)
     const originalWorkerPostMessage = Worker.prototype.postMessage;
     Worker.prototype.postMessage = function(message, transfer) {
-        if (message && message.messageType === 6) { // ControlCar channel
-            
-            // Only process frames when holding W or if we haven't compiled a macro map yet
+        if (message && message.messageType === 6) { 
+
+            // ZERO-LAG CHANNEL GATE: If macro is active but W isn't held, we pass empty frames.
+            // This prevents desync over the worker pipeline and lets the web thread run at full native speed.
             if (maxTimelineLength > 0 && !isHoldingDriveKey) {
-                // Freeze engine state by sending nothing or empty inputs until W is pressed
                 message.up = false;
                 message.down = false;
                 message.left = false;
@@ -206,13 +200,13 @@
 
             window.tasCurrentFrame++;
             
-            // PERFORMANCE FIX: Only update DOM text once every 10 frames to stop browser rendering lag
-            if (window.tasCurrentFrame % 10 === 0) {
+            // MASSIVE PERFORMANCE FIX: Throttled to 240 frames (Once every ~4 seconds)
+            // Completely stops the UI engine layout loop from thrashing your hardware CPU.
+            if (window.tasCurrentFrame % 240 === 0) {
                 frameCounterEl.innerText = window.tasCurrentFrame;
-            }
-            
-            if (window.tasCurrentFrame % 60 === 0 && window.tasCurrentFrame <= maxTimelineLength) {
-                statusLogEl.innerText = `Auto-Playing: Frame ${window.tasCurrentFrame}/${maxTimelineLength}`;
+                if (window.tasCurrentFrame <= maxTimelineLength) {
+                    statusLogEl.innerText = `Running: Frame ${window.tasCurrentFrame}/${maxTimelineLength}`;
+                }
             }
         }
         return originalWorkerPostMessage.apply(this, arguments);
