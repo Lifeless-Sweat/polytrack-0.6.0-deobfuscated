@@ -38,7 +38,7 @@
     hud.id = 'tas-hud-panel';
     hud.innerHTML = `
         <div class="tas-header-row">
-            <div class="tas-title">🧩 JSON TAS ENGINE v2.1</div>
+            <div class="tas-title">🧩 1MS AUTO-PLAY TAS v2.2</div>
             <button id="tas-minimize-btn">[-]</button>
         </div>
         <div class="tas-content-wrapper">
@@ -50,7 +50,7 @@
                 <textarea id="tas-json-input" placeholder="Paste your instructions_v2 JSON string layout here..."></textarea>
             </div>
             <button class="tas-btn" id="btn-load-json">⚡ Parse & Compile JSON Map</button>
-            <div id="tas-status-log">Awaiting JSON macro input injection...</div>
+            <div id="tas-status-log">Hold 'W' or 'ArrowUp' to Auto-Play (1 frame / 1ms)</div>
         </div>
     `;
     document.body.appendChild(hud);
@@ -62,14 +62,31 @@
         minBtn.innerText = hud.classList.contains('collapsed') ? '[+]' : '[-]';
     });
 
-    // 3. Timeline Global Storage
+    // 3. Timeline Global Storage & Key Interceptors
     window.tasCurrentFrame = 0;
-    let timelineInputs = {}; // Map: { frameNumber: { up: bool, down: bool, left: bool, right: bool, reset: bool } }
+    let timelineInputs = {}; 
     let maxTimelineLength = 0;
+    let isHoldingDriveKey = false;
+    let queuedWorkerMessages = [];
 
     const frameCounterEl = document.getElementById('tas-frame-counter');
     const statusLogEl = document.getElementById('tas-status-log');
     const jsonInputEl = document.getElementById('tas-json-input');
+
+    // Monitor when the player holds 'W' or 'ArrowUp' to drive the frame scheduler
+    window.addEventListener('keydown', (e) => {
+        if (document.activeElement === jsonInputEl) return; // Ignore if typing inside JSON box
+        if (e.code === 'KeyW' || e.code === 'ArrowUp') {
+            isHoldingDriveKey = true;
+        }
+    });
+
+    window.addEventListener('keyup', (e) => {
+        if (e.code === 'KeyW' || e.code === 'ArrowUp') {
+            isHoldingDriveKey = false;
+            clearMainThreadInputs();
+        }
+    });
 
     // Helper to clear keyboard state on the main window thread
     function clearMainThreadInputs() {
@@ -102,14 +119,13 @@
             const rawData = JSON.parse(jsonInputEl.value);
             const data = rawData.instructions_v2 || rawData;
 
-            // Reset engine timelines
             timelineInputs = {};
             window.tasCurrentFrame = 0;
             maxTimelineLength = 0;
+            queuedWorkerMessages = [];
             frameCounterEl.innerText = "0";
             clearMainThreadInputs();
 
-            // Translation key configurations
             const keyMappings = { w: 'up', s: 'down', a: 'left', d: 'right', r: 'reset' };
 
             Object.keys(keyMappings).forEach(keyChar => {
@@ -117,67 +133,59 @@
                 const targetField = keyMappings[keyChar];
 
                 instructionsArray.forEach(instr => {
-                    // Scenario A: Infinite hold string ("0")
                     if (instr === "0") {
-                        applyInputSpan(0, 50000, targetField); // Hold key for up to 50k frames max runtime
+                        applyInputSpan(0, 50000, targetField);
                         return;
                     }
-
-                    // Scenario B: Repeating loop clusters starting with an exclamation mark ("!6852-45-80-10")
                     if (instr.startsWith('!')) {
                         const parts = instr.substring(1).split('-').map(Number);
                         if (parts.length === 4) {
-                            let currentAnchor = parts[0]; // Start frame index
+                            let currentAnchor = parts[0];
                             const holdDuration = parts[1];
                             const releaseDuration = parts[2];
                             const loopCount = parts[3];
 
                             for (let l = 0; l < loopCount; l++) {
                                 applyInputSpan(currentAnchor, holdDuration, targetField);
-                                currentAnchor += holdDuration + releaseDuration; // Advance absolute anchor past cycle
+                                currentAnchor += holdDuration + releaseDuration;
                             }
                         }
                     } 
-                    // Scenario C: Isolated fixed frame duration windows ("45-31")
                     else if (instr.includes('-')) {
                         const parts = instr.split('-').map(Number);
                         if (parts.length === 2) {
-                            const startFrame = parts[0];
-                            const duration = parts[1];
-                            applyInputSpan(startFrame, duration, targetField);
+                            applyInputSpan(parts[0], parts[1], targetField);
                         }
                     }
                 });
             });
 
-            statusLogEl.innerHTML = `<span style="color: #a3be8c;">Successfully mapped timeline out to frame ${maxTimelineLength}! Drive to execute.</span>`;
+            statusLogEl.innerHTML = `<span style="color: #a3be8c;">Mapped ${maxTimelineLength} frames. HOLD 'W' to start auto-play!</span>`;
         } catch (err) {
-            statusLogEl.innerHTML = `<span style="color: #bf616a;">JSON Compile Parse Error: ${err.message}</span>`;
+            statusLogEl.innerHTML = `<span style="color: #bf616a;">JSON Parse Error: ${err.message}</span>`;
         }
     });
 
-    // 5. Worker Direct Physics Override Hook Channel
-    const originalWorkerPostMessage = Worker.prototype.postMessage;
-    Worker.prototype.postMessage = function(message, transfer) {
-        if (message && message.messageType === 6) { // ControlCar Action Array Channel
+    // 5. High-Speed 1ms Micro-Tick Processing Loop
+    setInterval(() => {
+        // Only pump a game frame forward if a message is waiting and the user is holding down W
+        if (isHoldingDriveKey && queuedWorkerMessages.length > 0) {
+            const job = queuedWorkerMessages.shift();
             let frameState = timelineInputs[window.tasCurrentFrame];
 
             if (frameState) {
-                // Enforce exact key states derived from the compiled JSON timeline mapping structure
-                message.up = frameState.up;
-                message.down = frameState.down;
-                message.left = frameState.left;
-                message.right = frameState.right;
-                message.reset = frameState.reset;
+                job.message.up = frameState.up;
+                job.message.down = frameState.down;
+                job.message.left = frameState.left;
+                job.message.right = frameState.right;
+                job.message.reset = frameState.reset;
             } else {
-                // If the engine runs past the JSON file inputs, drop actions to prevent ghost states
-                message.up = false;
-                message.down = false;
-                message.left = false;
-                message.right = false;
-                message.reset = false;
-                
-                // CRITICAL INPUT BUG FIX: Force clear inputs on main-thread windows to prevent stuck/runaway car physics
+                job.message.up = false;
+                job.message.down = false;
+                job.message.left = false;
+                job.message.right = false;
+                job.message.reset = false;
+
                 if (window.tasCurrentFrame === maxTimelineLength + 1) {
                     clearMainThreadInputs();
                 }
@@ -185,11 +193,30 @@
 
             window.tasCurrentFrame++;
             frameCounterEl.innerText = window.tasCurrentFrame;
-            
+
             if (window.tasCurrentFrame % 60 === 0 && window.tasCurrentFrame <= maxTimelineLength) {
-                statusLogEl.innerText = `Executing Timeline: Frame ${window.tasCurrentFrame}/${maxTimelineLength}`;
+                statusLogEl.innerText = `Auto-Playing: Frame ${window.tasCurrentFrame}/${maxTimelineLength}`;
             }
+
+            // Release the frame processing execution back to PolyTrack's physics worker thread
+            originalWorkerPostMessage.call(job.worker, job.message, job.transfer);
         }
+    }, 1); // 1ms high-frequency check intervals
+
+    // 6. Worker Hook Channel Gatekeeper
+    const originalWorkerPostMessage = Worker.prototype.postMessage;
+    Worker.prototype.postMessage = function(message, transfer) {
+        // Check if message is a ControlCar physics update request frame
+        if (message && message.messageType === 6) {
+            // Intercept message and queue it instead of firing immediately
+            queuedWorkerMessages.push({
+                worker: this,
+                message: message,
+                transfer: transfer
+            });
+            return;
+        }
+        // Let non-physics engine messages (menus, assets loading) flow instantly
         return originalWorkerPostMessage.apply(this, arguments);
     };
 })();
