@@ -1,20 +1,19 @@
-(function createTextTasUI() {
+(function createJsonTasUI() {
     // 1. Panel Layout Styling
     const style = document.createElement('style');
     style.innerHTML = `
         #tas-hud-panel {
-            position: absolute; top: 15px; right: 15px; width: 340px;
-            background: rgba(20, 20, 25, 0.98); border: 2px solid #a3be8c;
+            position: absolute; top: 15px; right: 15px; width: 360px;
+            background: rgba(20, 20, 25, 0.98); border: 2px solid #ebcb8b;
             color: #fff; font-family: 'Courier New', monospace; border-radius: 8px;
             z-index: 999999; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 14px;
         }
-        .tas-title { font-weight: bold; font-size: 13px; text-align: center; color: #a3be8c; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .tas-title { font-weight: bold; font-size: 13px; text-align: center; color: #ebcb8b; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px; }
         .tas-row { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; font-size: 12px; }
-        .tas-btn { background: #3b4252; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .tas-btn { background: #3b4252; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; width: 100%; }
         .tas-btn:hover { background: #4c566a; }
-        .tas-btn.active { background: #bf616a; color: #fff; }
-        #tas-input-script { width: 100%; height: 140px; background: #1a1c23; color: #a3be8c; border: 1px solid #4c566a; border-radius: 4px; font-family: monospace; font-size: 12px; padding: 6px; resize: vertical; box-sizing: border-box; }
-        #tas-status-log { font-size: 11px; color: #888; margin-top: 5px; text-align: center; }
+        #tas-json-input { width: 100%; height: 160px; background: #1a1c23; color: #ebcb8b; border: 1px solid #4c566a; border-radius: 4px; font-family: monospace; font-size: 11px; padding: 6px; resize: vertical; box-sizing: border-box; }
+        #tas-status-log { font-size: 11px; color: #a3be8c; margin-top: 5px; text-align: center; word-break: break-all; }
     `;
     document.head.appendChild(style);
 
@@ -22,89 +21,131 @@
     const hud = document.createElement('div');
     hud.id = 'tas-hud-panel';
     hud.innerHTML = `
-        <div class="tas-title">📝 TEXT-SCRIPT TAS ENGINE v1.0</div>
+        <div class="tas-title">🧩 JSON MACRO TAS ENGINE v2.0</div>
         <div class="tas-row">
-            <span>Simulated Frame:</span>
-            <span id="tas-frame-counter" style="color: #ebcb8b; font-weight: bold;">0</span>
+            <span>Engine Timeline Frame:</span>
+            <span id="tas-frame-counter" style="color: #a3be8c; font-weight: bold;">0</span>
         </div>
         <div style="margin-bottom: 10px;">
-            <textarea id="tas-input-script" placeholder="Examples:\n10W   (Hold W for 10 frames)\n5WD   (Hold W+D for 5 frames)\n20    (Idle for 20 frames)"></textarea>
+            <textarea id="tas-json-input" placeholder="Paste your instructions_v2 JSON string layout here..."></textarea>
         </div>
-        <div class="tas-row">
-            <button class="tas-btn" id="btn-compile-run" style="width: 100%; background: #4c566a;">⚙️ Compile & Inject Script</button>
-        </div>
-        <div id="tas-status-log">Ready. Write script and compile.</div>
+        <button class="tas-btn" id="btn-load-json">⚡ Parse & Compile JSON Map</button>
+        <div id="tas-status-log">Awaiting JSON macro input injection...</div>
     `;
     document.body.appendChild(hud);
 
-    // 3. Engine Operations Memory Modules
+    // 3. Timeline Global Storage
     window.tasCurrentFrame = 0;
-    let compiledPlaybackTimeline = []; // Array tracking exact keys per absolute frame index
+    let timelineInputs = {}; // Map: { frameNumber: { up: bool, down: bool, left: bool, right: bool, reset: bool } }
+    let maxTimelineLength = 0;
 
     const frameCounterEl = document.getElementById('tas-frame-counter');
     const statusLogEl = document.getElementById('tas-status-log');
-    const scriptInputEl = document.getElementById('tas-input-script');
+    const jsonInputEl = document.getElementById('tas-json-input');
 
-    // 4. Script Text Compiler Engine Loop
-    document.getElementById('btn-compile-run').addEventListener('click', () => {
-        const scriptText = scriptInputEl.value;
-        compiledPlaybackTimeline = []; // Flush old run sequences
-        window.tasCurrentFrame = 0;    // Reset tracking counters
-        frameCounterEl.innerText = "0";
-
-        // Regex mapping to slice commands (e.g., "15WAD" -> dur: 15, actions: "WAD")
-        const commandRegex = /(\d+)([a-zA-Z]*)/g;
-        let match;
-        let totalFramesCounted = 0;
-
-        while ((match = commandRegex.exec(scriptText)) !== null) {
-            let duration = parseInt(match[1], 10);
-            let actionString = match[2].toLowerCase();
-
-            let targetInputs = {
-                w: actionString.includes('w'),
-                a: actionString.includes('a'),
-                s: actionString.includes('s'),
-                d: actionString.includes('d')
-            };
-
-            // Expand shorthand instructions array linearly out into individual discrete hardware frames
-            for (let f = 0; f < duration; f++) {
-                compiledPlaybackTimeline.push({ ...targetInputs });
-            }
-            totalFramesCounted += duration;
+    // Helper to ensure a frame object exists in our map
+    function initFrame(f) {
+        if (!timelineInputs[f]) {
+            timelineInputs[f] = { up: false, down: false, left: false, right: false, reset: false };
         }
+    }
 
-        if (totalFramesCounted > 0) {
-            statusLogEl.innerHTML = `<span style="color: #a3be8c;">Compiled ${totalFramesCounted} frames successfully! Start driving to playback.</span>`;
-        } else {
-            statusLogEl.innerHTML = `<span style="color: #bf616a;">Error: No valid frame strings parsed.</span>`;
+    // Helper to apply keypresses continuously over a specified frame span
+    function applyInputSpan(startFrame, duration, keyField) {
+        for (let i = 0; i < duration; i++) {
+            let f = startFrame + i;
+            initFrame(f);
+            timelineInputs[f][keyField] = true;
+            if (f > maxTimelineLength) maxTimelineLength = f;
+        }
+    }
+
+    // 4. JSON String Map Compiler Pipeline
+    document.getElementById('btn-load-json').addEventListener('click', () => {
+        try {
+            const rawData = JSON.parse(jsonInputEl.value);
+            const data = rawData.instructions_v2 || rawData;
+
+            // Reset engine timelines
+            timelineInputs = {};
+            window.tasCurrentFrame = 0;
+            maxTimelineLength = 0;
+            frameCounterEl.innerText = "0";
+
+            // Translation key configurations
+            const keyMappings = { w: 'up', s: 'down', a: 'left', d: 'right', r: 'reset' };
+
+            Object.keys(keyMappings).forEach(keyChar => {
+                const instructionsArray = data[keyChar] || [];
+                const targetField = keyMappings[keyChar];
+
+                instructionsArray.forEach(instr => {
+                    // Scenario A: Infinite hold string ("0")
+                    if (instr === "0") {
+                        applyInputSpan(0, 50000, targetField); // Hold key for up to 50k frames max runtime
+                        return;
+                    }
+
+                    // Scenario B: Repeating loop clusters starting with an exclamation mark ("!6852-45-80-10")
+                    if (instr.startsWith('!')) {
+                        const parts = instr.substring(1).split('-').map(Number);
+                        if (parts.length === 4) {
+                            let currentAnchor = parts[0]; // Start frame index
+                            const holdDuration = parts[1];
+                            const releaseDuration = parts[2];
+                            const loopCount = parts[3];
+
+                            for (let l = 0; l < loopCount; l++) {
+                                applyInputSpan(currentAnchor, holdDuration, targetField);
+                                currentAnchor += holdDuration + releaseDuration; // Advance absolute anchor past cycle
+                            }
+                        }
+                    } 
+                    // Scenario C: Isolated fixed frame duration windows ("45-31")
+                    else if (instr.includes('-')) {
+                        const parts = instr.split('-').map(Number);
+                        if (parts.length === 2) {
+                            const startFrame = parts[0];
+                            const duration = parts[1];
+                            applyInputSpan(startFrame, duration, targetField);
+                        }
+                    }
+                });
+            });
+
+            statusLogEl.innerHTML = `<span style="color: #a3be8c;">Successfully mapped timeline out to frame ${maxTimelineLength}! Drive to execute.</span>`;
+        } catch (err) {
+            statusLogEl.innerHTML = `<span style="color: #bf616a;">JSON Compile Parse Error: ${err.message}</span>`;
         }
     });
 
-    // 5. Native Interception Hooks Bridge Layer
+    // 5. Worker Direct Physics Override Hook Channel
     const originalWorkerPostMessage = Worker.prototype.postMessage;
     Worker.prototype.postMessage = function(message, transfer) {
-        // messageType 6 = ControlCar packet array channel
-        if (message && message.messageType === 6) {
-            // Apply timeline manipulations if text blocks have been loaded into playback stack
-            if (compiledPlaybackTimeline.length > 0) {
-                
-                if (window.tasCurrentFrame < compiledPlaybackTimeline.length) {
-                    let activeFrameInputs = compiledPlaybackTimeline[window.tasCurrentFrame];
+        if (message && message.messageType === 6) { // ControlCar Action Array Channel
+            let frameState = timelineInputs[window.tasCurrentFrame];
 
-                    // Inject target parameters directly into the Web Worker data stream array layout
-                    message.up = activeFrameInputs.w;
-                    message.down = activeFrameInputs.s;
-                    message.left = activeFrameInputs.a;
-                    message.right = activeFrameInputs.d;
+            if (frameState) {
+                // Enforce exact key states derived from the compiled JSON timeline mapping structure
+                message.up = frameState.up;
+                message.down = frameState.down;
+                message.left = frameState.left;
+                message.right = frameState.right;
+                message.reset = frameState.reset;
+            } else {
+                // If the engine runs past the JSON file inputs, drop actions to prevent ghost states
+                message.up = false;
+                message.down = false;
+                message.left = false;
+                message.right = false;
+                message.reset = false;
+            }
 
-                    window.tasCurrentFrame++;
-                    frameCounterEl.innerText = window.tasCurrentFrame;
-                    statusLogEl.innerText = `Playing frame ${window.tasCurrentFrame} / ${compiledPlaybackTimeline.length}`;
-                } else {
-                    statusLogEl.innerHTML = `<span style="color: #ebcb8b;">Run Complete. Script sequence ended.</span>`;
-                }
+            window.tasCurrentFrame++;
+            frameCounterEl.innerText = window.tasCurrentFrame;
+            
+            if (window.tasCurrentFrame % 60 === 0 && window.tasCurrentFrame <= maxTimelineLength) {
+                statusLogEl.innerText = `Executing Timeline: Frame ${window.tasCurrentFrame}/${maxTimelineLength}`;
             }
         }
         return originalWorkerPostMessage.apply(this, arguments);
