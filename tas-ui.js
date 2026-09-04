@@ -38,7 +38,7 @@
     hud.id = 'tas-hud-panel';
     hud.innerHTML = `
         <div class="tas-header-row">
-            <div class="tas-title">🧩 JSON MACRO TAS ENGINE v2.3</div>
+            <div class="tas-title">🧩 JSON MACRO TAS ENGINE v2.4</div>
             <button id="tas-minimize-btn">[-]</button>
         </div>
         <div class="tas-content-wrapper">
@@ -135,7 +135,7 @@
                         return;
                     }
 
-                    // Scenario B: Repeating loop clusters (FIXED ARRAY INDICES)
+                    // Scenario B: Repeating loop clusters
                     if (instr.startsWith('!')) {
                         const parts = instr.substring(1).split('-').map(Number);
                         if (parts.length === 4) {
@@ -150,7 +150,7 @@
                             }
                         }
                     } 
-                    // Scenario C: Isolated fixed frame duration windows (FIXED ARRAY INDICES)
+                    // Scenario C: Isolated fixed frame duration windows
                     else if (instr.includes('-')) {
                         const parts = instr.split('-').map(Number);
                         if (parts.length === 2) {
@@ -205,7 +205,11 @@
             }
 
             window.tasCurrentFrame++;
-            frameCounterEl.innerText = window.tasCurrentFrame;
+            
+            // PERFORMANCE FIX: Only update DOM text once every 10 frames to stop browser rendering lag
+            if (window.tasCurrentFrame % 10 === 0) {
+                frameCounterEl.innerText = window.tasCurrentFrame;
+            }
             
             if (window.tasCurrentFrame % 60 === 0 && window.tasCurrentFrame <= maxTimelineLength) {
                 statusLogEl.innerText = `Auto-Playing: Frame ${window.tasCurrentFrame}/${maxTimelineLength}`;
