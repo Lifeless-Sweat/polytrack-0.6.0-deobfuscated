@@ -38,7 +38,7 @@
     hud.id = 'tas-hud-panel';
     hud.innerHTML = `
         <div class="tas-header-row">
-            <div class="tas-title">⚡ ULTRA-PERFORMANCE TAS v2.5</div>
+            <div class="tas-title">⚡ ZERO-LAG TAS ENGINE v2.6</div>
             <button id="tas-minimize-btn">[-]</button>
         </div>
         <div class="tas-content-wrapper">
@@ -72,8 +72,10 @@
     const statusLogEl = document.getElementById('tas-status-log');
     const jsonInputEl = document.getElementById('tas-json-input');
 
-    // Key interceptors optimized for game engine threading
+    // KEYBOARD SPAM FIX: e.repeat tracks if the OS is spamming the key down.
+    // If it is true, we immediately block it so it doesn't hurt game execution.
     window.addEventListener('keydown', (e) => {
+        if (e.repeat) return; // KILL THE KEY DOWN REPEAT FLOOD
         if (document.activeElement === jsonInputEl) return;
         if (e.code === 'KeyW' || e.code === 'ArrowUp') {
             isHoldingDriveKey = true;
@@ -162,13 +164,11 @@
         }
     });
 
-    // 5. Zero-Overhead Memory Injection Engine (Lag-Free Integration)
+    // 5. Main Processing Override
     const originalWorkerPostMessage = Worker.prototype.postMessage;
     Worker.prototype.postMessage = function(message, transfer) {
         if (message && message.messageType === 6) { 
 
-            // ZERO-LAG CHANNEL GATE: If macro is active but W isn't held, we pass empty frames.
-            // This prevents desync over the worker pipeline and lets the web thread run at full native speed.
             if (maxTimelineLength > 0 && !isHoldingDriveKey) {
                 message.up = false;
                 message.down = false;
@@ -200,9 +200,7 @@
 
             window.tasCurrentFrame++;
             
-            // MASSIVE PERFORMANCE FIX: Throttled to 240 frames (Once every ~4 seconds)
-            // Completely stops the UI engine layout loop from thrashing your hardware CPU.
-            if (window.tasCurrentFrame % 240 === 0) {
+            if (window.tasCurrentFrame % 60 === 0) {
                 frameCounterEl.innerText = window.tasCurrentFrame;
                 if (window.tasCurrentFrame <= maxTimelineLength) {
                     statusLogEl.innerText = `Running: Frame ${window.tasCurrentFrame}/${maxTimelineLength}`;
