@@ -1,5 +1,5 @@
 (function createJsonTasUI() {
-    // 1. Panel Layout Styling
+    // 1. Panel Layout Styling with Collapsible States
     const style = document.createElement('style');
     style.innerHTML = `
         #tas-hud-panel {
@@ -7,8 +7,24 @@
             background: rgba(20, 20, 25, 0.98); border: 2px solid #ebcb8b;
             color: #fff; font-family: 'Courier New', monospace; border-radius: 8px;
             z-index: 999999; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 14px;
+            transition: all 0.2s ease-in-out;
         }
-        .tas-title { font-weight: bold; font-size: 13px; text-align: center; color: #ebcb8b; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        #tas-hud-panel.collapsed {
+            width: 220px; padding: 8px 12px;
+        }
+        .tas-header-row {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 8px;
+        }
+        .tas-title { font-weight: bold; font-size: 13px; color: #ebcb8b; }
+        #tas-minimize-btn {
+            background: none; border: none; color: #ebcb8b; cursor: pointer;
+            font-family: monospace; font-size: 14px; font-weight: bold; padding: 0 4px;
+        }
+        #tas-minimize-btn:hover { color: #fff; }
+        .tas-content-wrapper { display: block; }
+        #tas-hud-panel.collapsed .tas-content-wrapper { display: none; }
+        
         .tas-row { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; font-size: 12px; }
         .tas-btn { background: #3b4252; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; width: 100%; }
         .tas-btn:hover { background: #4c566a; }
@@ -17,22 +33,34 @@
     `;
     document.head.appendChild(style);
 
-    // 2. DOM Layout Structure
+    // 2. DOM Layout Structure with Minimize Toggle
     const hud = document.createElement('div');
     hud.id = 'tas-hud-panel';
     hud.innerHTML = `
-        <div class="tas-title">🧩 JSON MACRO TAS ENGINE v2.0</div>
-        <div class="tas-row">
-            <span>Engine Timeline Frame:</span>
-            <span id="tas-frame-counter" style="color: #a3be8c; font-weight: bold;">0</span>
+        <div class="tas-header-row">
+            <div class="tas-title">🧩 JSON TAS ENGINE v2.1</div>
+            <button id="tas-minimize-btn">[-]</button>
         </div>
-        <div style="margin-bottom: 10px;">
-            <textarea id="tas-json-input" placeholder="Paste your instructions_v2 JSON string layout here..."></textarea>
+        <div class="tas-content-wrapper">
+            <div class="tas-row">
+                <span>Timeline Frame:</span>
+                <span id="tas-frame-counter" style="color: #a3be8c; font-weight: bold;">0</span>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <textarea id="tas-json-input" placeholder="Paste your instructions_v2 JSON string layout here..."></textarea>
+            </div>
+            <button class="tas-btn" id="btn-load-json">⚡ Parse & Compile JSON Map</button>
+            <div id="tas-status-log">Awaiting JSON macro input injection...</div>
         </div>
-        <button class="tas-btn" id="btn-load-json">⚡ Parse & Compile JSON Map</button>
-        <div id="tas-status-log">Awaiting JSON macro input injection...</div>
     `;
     document.body.appendChild(hud);
+
+    // Minimize Button Handler
+    const minBtn = document.getElementById('tas-minimize-btn');
+    minBtn.addEventListener('click', () => {
+        hud.classList.toggle('collapsed');
+        minBtn.innerText = hud.classList.contains('collapsed') ? '[+]' : '[-]';
+    });
 
     // 3. Timeline Global Storage
     window.tasCurrentFrame = 0;
@@ -42,6 +70,14 @@
     const frameCounterEl = document.getElementById('tas-frame-counter');
     const statusLogEl = document.getElementById('tas-status-log');
     const jsonInputEl = document.getElementById('tas-json-input');
+
+    // Helper to clear keyboard state on the main window thread
+    function clearMainThreadInputs() {
+        const browserKeys = ['KeyW', 'KeyS', 'KeyA', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyR'];
+        browserKeys.forEach(k => {
+            window.dispatchEvent(new KeyboardEvent('keyup', { code: k, key: k, bubbles: true }));
+        });
+    }
 
     // Helper to ensure a frame object exists in our map
     function initFrame(f) {
@@ -71,6 +107,7 @@
             window.tasCurrentFrame = 0;
             maxTimelineLength = 0;
             frameCounterEl.innerText = "0";
+            clearMainThreadInputs();
 
             // Translation key configurations
             const keyMappings = { w: 'up', s: 'down', a: 'left', d: 'right', r: 'reset' };
@@ -139,6 +176,11 @@
                 message.left = false;
                 message.right = false;
                 message.reset = false;
+                
+                // CRITICAL INPUT BUG FIX: Force clear inputs on main-thread windows to prevent stuck/runaway car physics
+                if (window.tasCurrentFrame === maxTimelineLength + 1) {
+                    clearMainThreadInputs();
+                }
             }
 
             window.tasCurrentFrame++;
