@@ -1,202 +1,192 @@
-(function createAdvancedTasUI() {
-    // 1. Panel Layout Styling with Savestate Additions
+(function createCwcTrueTasEngine() {
+    // 1. Sleek Settings HUD Layout Styling (Matches the cwcinc theme colors)
     const style = document.createElement('style');
     style.innerHTML = `
-        #tas-hud-panel {
-            position: absolute; top: 15px; right: 15px; width: 380px;
-            background: rgba(20, 20, 25, 0.98); border: 2px solid #ebcb8b;
-            color: #fff; font-family: 'Courier New', monospace; border-radius: 8px;
-            z-index: 999999; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 14px;
+        #tas-cwc-hud {
+            position: absolute; top: 20px; right: 20px; width: 340px;
+            background: rgba(26, 32, 53, 0.98); border: 2px solid #5275a1;
+            color: #ffffff; font-family: 'Courier New', monospace; border-radius: 6px;
+            z-index: 999999; box-shadow: 0 6px 20px rgba(0,0,0,0.6); padding: 14px;
         }
-        .tas-header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 8px; }
-        .tas-title { font-weight: bold; font-size: 13px; color: #ebcb8b; }
-        .tas-row { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; font-size: 12px; }
-        .tas-btn-group { display: flex; gap: 6px; margin-bottom: 8px; }
-        .tas-btn { background: #3b4252; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; flex: 1; text-align: center; }
-        .tas-btn:hover { background: #4c566a; }
-        .btn-save { background: #5e81ac; }
-        .btn-load { background: #a3be8c; color: #2e3440; }
-        .btn-step { background: #b48ead; }
-        #tas-json-input { width: 100%; height: 120px; background: #1a1c23; color: #ebcb8b; border: 1px solid #4c566a; border-radius: 4px; font-family: monospace; font-size: 11px; padding: 6px; resize: vertical; box-sizing: border-box; }
-        #tas-status-log { font-size: 11px; color: #a3be8c; margin-top: 5px; text-align: center; word-break: break-all; }
+        .hud-header { font-weight: bold; font-size: 14px; text-align: center; color: #8cb4e6; border-bottom: 2px solid #3b4870; padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .hud-section { font-size: 11px; color: #7388b1; margin-top: 8px; font-weight: bold; text-transform: uppercase; border-bottom: 1px dashed #3b4870; padding-bottom: 2px; }
+        .hud-row { display: flex; justify-content: space-between; margin: 6px 0; align-items: center; font-size: 12px; }
+        .hud-val { color: #a3be8c; font-weight: bold; background: #111424; padding: 2px 6px; border-radius: 4px; }
+        .hud-btn-group { display: flex; gap: 6px; margin-top: 10px; }
+        .hud-btn { background: #3b4870; color: white; border: 1px solid #5275a1; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; flex: 1; text-align: center; }
+        .hud-btn:hover { background: #4d5e94; }
+        .btn-apply { background: #2e6930; border-color: #449c47; }
+        .btn-apply:hover { background: #3b873e; }
     `;
     document.head.appendChild(style);
 
-    // 2. DOM Layout Structure
+    // 2. DOM Interface Attachment
     const hud = document.createElement('div');
-    hud.id = 'tas-hud-panel';
+    hud.id = 'tas-cwc-hud';
     hud.innerHTML = `
-        <div class="tas-header-row">
-            <div class="tas-title">🛠️ ADVANCED CWC-STYLE TAS ENGINE v4.0</div>
-        </div>
-        <div class="tas-row">
-            <span>Timeline Frame:</span>
-            <span id="tas-frame-counter" style="color: #a3be8c; font-weight: bold;">0</span>
-        </div>
+        <div class="hud-header">Settings</div>
         
-        <!-- Savestate & Stepping Core Blocks -->
-        <div class="tas-btn-group">
-            <button class="tas-btn btn-save" id="btn-save-state">💾 Save State (F5)</button>
-            <button class="tas-btn btn-load" id="btn-load-state">⏳ Load State (F6)</button>
-        </div>
-        <div class="tas-btn-group">
-            <button class="tas-btn btn-step" id="btn-frame-step">⏭️ Frame Advance (F7)</button>
-        </div>
+        <div class="hud-section">Status</div>
+        <div class="hud-row"><span>State:</span><span id="tas-pause-state" class="hud-val" style="color:#bf616a;">PAUSED</span></div>
+        <div class="hud-row"><span>Current Frame:</span><span id="tas-frame-txt" class="hud-val">0</span></div>
+        
+        <div class="hud-section">TAS Controls (Hotkeys)</div>
+        <div class="hud-row"><span>Pause / Unpause</span><span class="hud-val" style="color:#8cb4e6;">P / SPACE</span></div>
+        <div class="hud-row"><span>SaveState Checkpoint</span><span class="hud-val" style="color:#8cb4e6;">L</span></div>
+        <div class="hud-row"><span>Reset to Checkpoint</span><span class="hud-val" style="color:#8cb4e6;">P (when paused)</span></div>
+        <div class="hud-row"><span>Auto Tapping Toggle</span><span class="hud-val" style="color:#8cb4e6;">O</span></div>
 
-        <div style="margin-bottom: 10px;">
-            <textarea id="tas-json-input" placeholder="Paste your instructions_v2 JSON string layout here..."></textarea>
+        <div class="hud-section">Data Pipelines</div>
+        <div class="hud-btn-group">
+            <button class="hud-btn" id="btn-load-tas">Load TAS</button>
+            <button class="hud-btn btn-apply" id="btn-export-tas">Export TAS ✓</button>
         </div>
-        <button class="tas-btn" id="btn-load-json" style="width:100%;">⚡ Compile JSON Macro Map</button>
-        <div id="tas-status-log">Hold 'W' to run, F5/F6 to manage memory states.</div>
     `;
     document.body.appendChild(hud);
 
-    // 3. Engine Global Storage
+    // 3. Engine Memory Matrix Arrays
+    let frameHistoryLog = []; 
+    let recordedInputsTimeline = {}; 
+    
+    let activeSaveStateCheckpoint = null; 
+    let lastPolledCarPhysicsData = null; 
+
     window.tasCurrentFrame = 0;
-    let timelineInputs = {}; 
-    let maxTimelineLength = 0;
-    let isHoldingDriveKey = false;
-    let manualStepRequested = false;
+    let isGameSuspended = true; 
+    let autoTappingActive = false;
 
-    // Memory Channel allocation to hold Physics states
-    let savedPhysicsState = null;
-    let lastKnownCarPhysicsData = null;
+    const currentLiveKeyboardState = { up: false, down: false, left: false, right: false, reset: false };
 
-    const frameCounterEl = document.getElementById('tas-frame-counter');
-    const statusLogEl = document.getElementById('tas-status-log');
-    const jsonInputEl = document.getElementById('tas-json-input');
+    const txtPauseState = document.getElementById('tas-pause-state');
+    const txtFrameCounter = document.getElementById('tas-frame-txt');
 
-    // Hotkey Controls Manager
+    // 4. Live Keyboard Listener Arrays
     window.addEventListener('keydown', (e) => {
-        if (document.activeElement === jsonInputEl) return;
-        
-        if (e.code === 'KeyW' || e.code === 'ArrowUp') {
-            isHoldingDriveKey = true;
-        }
-        if (e.code === 'F5') { // Save State
+        if (e.code === 'KeyP' || e.code === 'Space') {
             e.preventDefault();
-            triggerSaveAction();
+            isGameSuspended = !isGameSuspended;
+            txtPauseState.innerText = isGameSuspended ? "PAUSED" : "RUNNING";
+            txtPauseState.style.color = isGameSuspended ? "#bf616a" : "#a3be8c";
+            return;
         }
-        if (e.code === 'F6') { // Load State
+
+        if (e.code === 'KeyL') { 
             e.preventDefault();
-            triggerLoadAction();
+            if (lastPolledCarPhysicsData) {
+                activeSaveStateCheckpoint = {
+                    frame: window.tasCurrentFrame,
+                    physicsSnapshot: JSON.parse(JSON.stringify(lastPolledCarPhysicsData)),
+                    timelineBackup: JSON.parse(JSON.stringify(recordedInputsTimeline))
+                };
+                alert(`Checkpoint Saved Successfully at Frame: ${window.tasCurrentFrame}`);
+            }
+            return;
         }
-        if (e.code === 'F7') { // Frame Step
+
+        if (e.code === 'KeyO') { 
             e.preventDefault();
-            manualStepRequested = true;
+            autoTappingActive = !autoTappingActive;
+            alert(`Auto Tapping set to: ${autoTappingActive ? 'ENABLED' : 'DISABLED'}`);
+            return;
         }
+
+        if (isGameSuspended && (e.code === 'KeyR' || e.code === 'KeyP')) {
+            if (activeSaveStateCheckpoint) {
+                window.tasCurrentFrame = activeSaveStateCheckpoint.frame;
+                recordedInputsTimeline = JSON.parse(JSON.stringify(activeSaveStateCheckpoint.timelineBackup));
+                frameHistoryLog = frameHistoryLog.slice(0, window.tasCurrentFrame);
+                txtFrameCounter.innerText = window.tasCurrentFrame;
+                return;
+            }
+        }
+
+        if (e.code === 'KeyW' || e.code === 'ArrowUp')    currentLiveKeyboardState.up = true;
+        if (e.code === 'KeyS' || e.code === 'ArrowDown')  currentLiveKeyboardState.down = true;
+        if (e.code === 'KeyA' || e.code === 'ArrowLeft')  currentLiveKeyboardState.left = true;
+        if (e.code === 'KeyD' || e.code === 'ArrowRight') currentLiveKeyboardState.right = true;
+        if (e.code === 'KeyR')                             currentLiveKeyboardState.reset = true;
     });
 
     window.addEventListener('keyup', (e) => {
-        if (e.code === 'KeyW' || e.code === 'ArrowUp') {
-            isHoldingDriveKey = false;
-            clearMainThreadInputs();
-        }
+        if (e.code === 'KeyW' || e.code === 'ArrowUp')    currentLiveKeyboardState.up = false;
+        if (e.code === 'KeyS' || e.code === 'ArrowDown')  currentLiveKeyboardState.down = false;
+        if (e.code === 'KeyA' || e.code === 'ArrowLeft')  currentLiveKeyboardState.left = false;
+        if (e.code === 'KeyD' || e.code === 'ArrowRight') currentLiveKeyboardState.right = false;
+        if (e.code === 'KeyR')                             currentLiveKeyboardState.reset = false;
     });
 
-    document.getElementById('btn-save-state').addEventListener('click', triggerSaveAction);
-    document.getElementById('btn-load-state').addEventListener('click', triggerLoadAction);
-    document.getElementById('btn-frame-step').addEventListener('click', () => { manualStepRequested = true; });
+    // 5. Native Load and Export Actions (Macro Pipeline Formatting Fixes)
+    document.getElementById('btn-export-tas').addEventListener('click', () => {
+        const exportFormat = { instructions_v2: { w: [], a: [], s: [], d: [], r: [] } };
+        const keyCharMap = { up: 'w', left: 'a', down: 's', right: 'd', reset: 'r' };
 
-    function triggerSaveAction() {
-        if (lastKnownCarPhysicsData) {
-            // Clone snapshot of the current worker state memory stack
-            savedPhysicsState = {
-                frame: window.tasCurrentFrame,
-                physics: JSON.parse(JSON.stringify(lastKnownCarPhysicsData))
-            };
-            statusLogEl.innerText = `State Saved at frame: ${savedPhysicsState.frame}`;
-        } else {
-            statusLogEl.innerText = "Error: Driving must begin before state capture is valid.";
-        }
-    }
+        let activeTracks = { up: null, left: null, down: null, right: null, reset: null };
 
-    function triggerLoadAction() {
-        if (savedPhysicsState) {
-            window.tasCurrentFrame = savedPhysicsState.frame;
-            frameCounterEl.innerText = window.tasCurrentFrame;
-            statusLogEl.innerText = `Loaded state back to frame: ${window.tasCurrentFrame}`;
-            // Handled next loop iteration inside worker hook
-        } else {
-            statusLogEl.innerText = "Error: No saved state exists in memory buffer.";
-        }
-    }
-
-    function clearMainThreadInputs() {
-        ['KeyW', 'KeyS', 'KeyA', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyR'].forEach(k => {
-            window.dispatchEvent(new KeyboardEvent('keyup', { code: k, key: k, bubbles: true }));
-        });
-    }
-
-    function initFrame(f) {
-        if (!timelineInputs[f]) {
-            timelineInputs[f] = { up: false, down: false, left: false, right: false, reset: false };
-        }
-    }
-
-    function applyInputSpan(startFrame, duration, keyField) {
-        for (let i = 0; i < duration; i++) {
-            let f = startFrame + i;
-            initFrame(f);
-            timelineInputs[f][keyField] = true;
-            if (f > maxTimelineLength) maxTimelineLength = f;
-        }
-    }
-
-    // JSON Parser
-    document.getElementById('btn-load-json').addEventListener('click', () => {
-        try {
-            const rawData = JSON.parse(jsonInputEl.value);
-            const data = rawData.instructions_v2 || rawData;
-            timelineInputs = {}; window.tasCurrentFrame = 0; maxTimelineLength = 0;
-            frameCounterEl.innerText = "0"; clearMainThreadInputs();
-
-            const keyMappings = { w: 'up', s: 'down', a: 'left', d: 'right', r: 'reset' };
-            Object.keys(keyMappings).forEach(keyChar => {
-                const instructionsArray = data[keyChar] || [];
-                const targetField = keyMappings[keyChar];
-
-                instructionsArray.forEach(instr => {
-                    if (instr === "0") { applyInputSpan(0, 60000, targetField); return; }
-                    if (typeof instr === 'string' && instr.startsWith('!')) {
-                        const parts = instr.substring(1).split('-').map(Number);
-                        if (parts.length === 4) {
-                            let currentAnchor = parts[0]; const holdDuration = parts[1]; const releaseDuration = parts[2]; const loopCount = parts[3];
-                            for (let l = 0; l < loopCount; l++) { applyInputSpan(currentAnchor, holdDuration, targetField); currentAnchor += holdDuration + releaseDuration; }
-                        }
-                    } else if (typeof instr === 'string' && instr.includes('-')) {
-                        const parts = instr.split('-').map(Number);
-                        if (parts.length === 2) { applyInputSpan(parts[0], parts[1], targetField); }
+        for (let f = 0; f <= window.tasCurrentFrame; f++) {
+            const inputs = recordedInputsTimeline[f] || { up: false, left: false, down: false, right: false, reset: false };
+            
+            Object.keys(activeTracks).forEach(key => {
+                const char = keyCharMap[key];
+                if (inputs[key]) {
+                    if (activeTracks[key] === null) {
+                        activeTracks[key] = { start: f, count: 1 };
+                    } else {
+                        activeTracks[key].count++;
                     }
-                });
+                } else {
+                    if (activeTracks[key] !== null) {
+                        exportFormat.instructions_v2[char].push(`${activeTracks[key].start}-${activeTracks[key].count}`);
+                        activeTracks[key] = null;
+                    }
+                }
             });
-            statusLogEl.innerHTML = `Parsed ${maxTimelineLength} frames. Ready.`;
-        } catch (err) { statusLogEl.innerHTML = `Compiler Error: ${err.message}`; }
+        }
+
+        Object.keys(activeTracks).forEach(key => {
+            if (activeTracks[key] !== null) {
+                exportFormat.instructions_v2[keyCharMap[key]].push(`${activeTracks[key].start}-${activeTracks[key].count}`);
+            }
+        });
+
+        const outputBlobString = JSON.stringify(exportFormat, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(outputBlobString);
+        
+        const exportAnchor = document.createElement('a');
+        exportAnchor.setAttribute('href', dataUri);
+        exportAnchor.setAttribute('download', 'polytrack_macro.json');
+        exportAnchor.click();
     });
 
-    // 4. Isolated Worker Pipeline with State Restoration Injection Core
-    const OriginalWorker = window.Worker;
-    window.Worker = function(scriptURL, options) {
-        const workerInstance = new OriginalWorker(scriptURL, options);
+    document.getElementById('btn-load-tas').addEventListener('click', () => {
+        const rawJsonInput = prompt("Paste your instructions_v2 Macro JSON String down below:");
+        if (!rawJsonInput) return;
+        try {
+            const parsed = JSON.parse(rawJsonInput);
+            const data = parsed.instructions_v2 || parsed;
+            recordedInputsTimeline = {};
+            window.tasCurrentFrame = 0;
 
-        if (typeof scriptURL === 'string' && scriptURL.includes('simulation_worker')) {
-            const originalPostMessage = workerInstance.postMessage;
+            const compilerMap = { w: 'up', s: 'down', a: 'left', d: 'right', r: 'reset' };
+            Object.keys(compilerMap).forEach(char => {
+                const sequences = data[char] || [];
+                const targetField = compilerMap[char];
 
-            workerInstance.postMessage = function(message, transfer) {
-                if (message && (message.messageType === 6 || (message.up !== undefined && message.left !== undefined))) {
-                    
-                    // Track position transformations natively for state allocation queries
-                    if (message.linearVelocity || message.position) {
-                        lastKnownCarPhysicsData = message;
+                sequences.forEach(str => {
+                    if (str === "0") {
+                        for(let i=0; i<60000; i++) {
+                            if(!recordedInputsTimeline[i]) recordedInputsTimeline[i] = { up: false, down: false, left: false, right: false, reset: false };
+                            recordedInputsTimeline[i][targetField] = true;
+                        }
+                        return;
                     }
-
-                    // Memory Teleport Injection: Overwrite current position data structures inside simulation thread
-                    if (savedPhysicsState && window.tasCurrentFrame === savedPhysicsState.frame) {
-                        if (savedPhysicsState.physics.position) message.position = savedPhysicsState.physics.position;
-                        if (savedPhysicsState.physics.linearVelocity) message.linearVelocity = savedPhysicsState.physics.linearVelocity;
-                        if (savedPhysicsState.physics.rotation) message.rotation = savedPhysicsState.physics.rotation;
+                    if (str.includes('-')) {
+                        const parts = str.split('-').map(Number);
+                        const startFrame = parts[0];
+                        const duration = parts[1];
+                        for(let i = 0; i < duration; i++) {
+                            let f = startFrame + i;
+                            if(!recordedInputsTimeline[f]) recordedInputsTimeline[f] = { up: false, down: false, left: false, right: false, reset: false };
+                            recordedInputsTimeline[f][targetField] = true;
+                        }
                     }
-
-                    // Stepping Gate Block
-                    const shouldAdvanceFrame = isHoldingDriveKey || manualStepRequested;
-                    
+});});alert("Macro compiled successfully into live playback timeline!");} catch(e) {alert("Error parsing loaded TAS: " + e.message);}});// 6. Hooking the Core Game Simulation Web Worker Thread Channels Nativelyconst OriginalWorker = window.Worker;window.Worker = function(scriptURL, options) {const workerInstance = new OriginalWorker(scriptURL, options);if (typeof scriptURL === 'string' && scriptURL.includes('simulation_worker')) {const originalPostMessage = workerInstance.postMessage;workerInstance.postMessage = function(message, transfer) {if (message && (message.messageType === 6 || message.up !== undefined)) {if (message.linearVelocity || message.position) {lastPolledCarPhysicsData = message;}if (isGameSuspended) {message.up = false; message.down = false; message.left = false; message.right = false; message.reset = false;return originalPostMessage.apply(this, arguments);}if (activeSaveStateCheckpoint && window.tasCurrentFrame === activeSaveStateCheckpoint.frame) {if (activeSaveStateCheckpoint.physicsSnapshot.position) message.position = activeSaveStateCheckpoint.physicsSnapshot.position;if (activeSaveStateCheckpoint.physicsSnapshot.linearVelocity) message.linearVelocity = activeSaveStateCheckpoint.physicsSnapshot.linearVelocity;if (activeSaveStateCheckpoint.physicsSnapshot.rotation) message.rotation = activeSaveStateCheckpoint.physicsSnapshot.rotation;}if (!recordedInputsTimeline[window.tasCurrentFrame]) {recordedInputsTimeline[window.tasCurrentFrame] = {up: currentLiveKeyboardState.up,down: currentLiveKeyboardState.down,left: currentLiveKeyboardState.left,right: currentLiveKeyboardState.right,reset: currentLiveKeyboardState.reset};}let frameState = recordedInputsTimeline[window.tasCurrentFrame];message.up = frameState.up;message.down = frameState.down;message.left = frameState.left;message.right = frameState.right;message.reset = frameState.reset;if (autoTappingActive && window.tasCurrentFrame % 2 === 0) {message.up = false;}window.tasCurrentFrame++;if (window.tasCurrentFrame % 10 === 0) {txtFrameCounter.innerText = window.tasCurrentFrame;}}return originalPostMessage.apply(this, arguments);};}return workerInstance;};window.Worker.prototype = OriginalWorker.prototype;})();
