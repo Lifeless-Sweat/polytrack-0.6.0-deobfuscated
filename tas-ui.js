@@ -38,7 +38,7 @@
     hud.id = 'tas-hud-panel';
     hud.innerHTML = `
         <div class="tas-header-row">
-            <div class="tas-title">⚡ ZERO-LAG TAS ENGINE v2.7</div>
+            <div class="tas-title">🧩 LAG-FREE TAS ENGINE v2.8</div>
             <button id="tas-minimize-btn">[-]</button>
         </div>
         <div class="tas-content-wrapper">
@@ -49,8 +49,8 @@
             <div style="margin-bottom: 10px;">
                 <textarea id="tas-json-input" placeholder="Paste your instructions_v2 JSON string layout here..."></textarea>
             </div>
-            <button class="tas-btn" id="btn-load-json">⚡ Parse & Compile JSON Map</button>
-            <div id="tas-status-log">Ready for parsing.</div>
+            <button class="tas-btn" id="btn-load-json">⚡ Compile JSON Macro Map</button>
+            <div id="tas-status-log">Awaiting JSON macro input injection...</div>
         </div>
     `;
     document.body.appendChild(hud);
@@ -72,7 +72,7 @@
     const statusLogEl = document.getElementById('tas-status-log');
     const jsonInputEl = document.getElementById('tas-json-input');
 
-    // Keyboard loop optimizations
+    // Smooth keyboard listener blocks repeated OS keydown commands to remove lag
     window.addEventListener('keydown', (e) => {
         if (e.repeat) return;
         if (document.activeElement === jsonInputEl) return;
@@ -102,8 +102,6 @@
     }
 
     function applyInputSpan(startFrame, duration, keyField) {
-        // Optimized: Prevents out-of-bounds safety hanging
-        if (duration <= 0 || duration > 100000) return; 
         for (let i = 0; i < duration; i++) {
             let f = startFrame + i;
             initFrame(f);
@@ -112,7 +110,7 @@
         }
     }
 
-    // 4. HIGH-SPEED FIXED JSON Compiler Pipeline 
+    // 4. Fixed JSON Compiler Pipeline (Restored working explicit index numbers)
     document.getElementById('btn-load-json').addEventListener('click', () => {
         try {
             const rawData = JSON.parse(jsonInputEl.value);
@@ -137,7 +135,7 @@
                         return;
                     }
 
-                    // Scenario B: Repeating loop clusters (FIXED STRUCTURAL ARRAY ACCESS INDEXES)
+                    // Scenario B: Repeating loop clusters starting with an exclamation mark ("!6852-45-80-10")
                     if (typeof instr === 'string' && instr.startsWith('!')) {
                         const parts = instr.substring(1).split('-').map(Number);
                         if (parts.length === 4) {
@@ -146,16 +144,13 @@
                             const releaseDuration = parts[2];
                             const loopCount = parts[3];
 
-                            // Safety barrier to avoid freezing the tab completely
-                            if ((holdDuration + releaseDuration) <= 0 || loopCount > 2000) return;
-
                             for (let l = 0; l < loopCount; l++) {
                                 applyInputSpan(currentAnchor, holdDuration, targetField);
                                 currentAnchor += holdDuration + releaseDuration;
                             }
                         }
                     } 
-                    // Scenario C: Isolated fixed frame duration windows (FIXED STRUCTURAL ARRAY ACCESS INDEXES)
+                    // Scenario C: Isolated fixed frame duration windows ("45-31")
                     else if (typeof instr === 'string' && instr.includes('-')) {
                         const parts = instr.split('-').map(Number);
                         if (parts.length === 2) {
@@ -173,11 +168,13 @@
         }
     });
 
-    // 5. Native Thread Interception Core Channel
+    // 5. High-Speed Physics Worker Hook Bridge 
     const originalWorkerPostMessage = Worker.prototype.postMessage;
     Worker.prototype.postMessage = function(message, transfer) {
-        if (message && message.messageType === 6) { 
+        // Universal detection channel for game physics update frames
+        if (message && (message.messageType === 6 || (message.up !== undefined && message.left !== undefined))) { 
 
+            // Freeze loop checkpoint gate: If you aren't holding W, pause car state and don't increment frames
             if (maxTimelineLength > 0 && !isHoldingDriveKey) {
                 message.up = false;
                 message.down = false;
@@ -209,10 +206,11 @@
 
             window.tasCurrentFrame++;
             
+            // Lightweight UI layout update interval saves heavy CPU lag
             if (window.tasCurrentFrame % 60 === 0) {
                 frameCounterEl.innerText = window.tasCurrentFrame;
                 if (window.tasCurrentFrame <= maxTimelineLength) {
-                    statusLogEl.innerText = `Running: Frame ${window.tasCurrentFrame}/${maxTimelineLength}`;
+                    statusLogEl.innerText = `Auto-Playing: Frame ${window.tasCurrentFrame}/${maxTimelineLength}`;
                 }
             }
         }
