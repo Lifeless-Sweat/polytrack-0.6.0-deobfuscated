@@ -38,7 +38,7 @@
     hud.id = 'tas-hud-panel';
     hud.innerHTML = `
         <div class="tas-header-row">
-            <div class="tas-title">⚡ ZERO-LAG TAS ENGINE v2.6</div>
+            <div class="tas-title">⚡ ZERO-LAG TAS ENGINE v2.7</div>
             <button id="tas-minimize-btn">[-]</button>
         </div>
         <div class="tas-content-wrapper">
@@ -50,7 +50,7 @@
                 <textarea id="tas-json-input" placeholder="Paste your instructions_v2 JSON string layout here..."></textarea>
             </div>
             <button class="tas-btn" id="btn-load-json">⚡ Parse & Compile JSON Map</button>
-            <div id="tas-status-log">Hold 'W' or 'ArrowUp' to run seamlessly.</div>
+            <div id="tas-status-log">Ready for parsing.</div>
         </div>
     `;
     document.body.appendChild(hud);
@@ -72,10 +72,9 @@
     const statusLogEl = document.getElementById('tas-status-log');
     const jsonInputEl = document.getElementById('tas-json-input');
 
-    // KEYBOARD SPAM FIX: e.repeat tracks if the OS is spamming the key down.
-    // If it is true, we immediately block it so it doesn't hurt game execution.
+    // Keyboard loop optimizations
     window.addEventListener('keydown', (e) => {
-        if (e.repeat) return; // KILL THE KEY DOWN REPEAT FLOOD
+        if (e.repeat) return;
         if (document.activeElement === jsonInputEl) return;
         if (e.code === 'KeyW' || e.code === 'ArrowUp') {
             isHoldingDriveKey = true;
@@ -89,7 +88,6 @@
         }
     });
 
-    // Prevent input latches
     function clearMainThreadInputs() {
         const browserKeys = ['KeyW', 'KeyS', 'KeyA', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyR'];
         browserKeys.forEach(k => {
@@ -104,6 +102,8 @@
     }
 
     function applyInputSpan(startFrame, duration, keyField) {
+        // Optimized: Prevents out-of-bounds safety hanging
+        if (duration <= 0 || duration > 100000) return; 
         for (let i = 0; i < duration; i++) {
             let f = startFrame + i;
             initFrame(f);
@@ -112,7 +112,7 @@
         }
     }
 
-    // 4. JSON Compiler Pipeline
+    // 4. HIGH-SPEED FIXED JSON Compiler Pipeline 
     document.getElementById('btn-load-json').addEventListener('click', () => {
         try {
             const rawData = JSON.parse(jsonInputEl.value);
@@ -131,11 +131,14 @@
                 const targetField = keyMappings[keyChar];
 
                 instructionsArray.forEach(instr => {
+                    // Scenario A: Infinite hold string ("0")
                     if (instr === "0") {
                         applyInputSpan(0, 60000, targetField);
                         return;
                     }
-                    if (instr.startsWith('!')) {
+
+                    // Scenario B: Repeating loop clusters (FIXED STRUCTURAL ARRAY ACCESS INDEXES)
+                    if (typeof instr === 'string' && instr.startsWith('!')) {
                         const parts = instr.substring(1).split('-').map(Number);
                         if (parts.length === 4) {
                             let currentAnchor = parts[0]; 
@@ -143,28 +146,34 @@
                             const releaseDuration = parts[2];
                             const loopCount = parts[3];
 
+                            // Safety barrier to avoid freezing the tab completely
+                            if ((holdDuration + releaseDuration) <= 0 || loopCount > 2000) return;
+
                             for (let l = 0; l < loopCount; l++) {
                                 applyInputSpan(currentAnchor, holdDuration, targetField);
                                 currentAnchor += holdDuration + releaseDuration;
                             }
                         }
                     } 
-                    else if (instr.includes('-')) {
+                    // Scenario C: Isolated fixed frame duration windows (FIXED STRUCTURAL ARRAY ACCESS INDEXES)
+                    else if (typeof instr === 'string' && instr.includes('-')) {
                         const parts = instr.split('-').map(Number);
                         if (parts.length === 2) {
-                            applyInputSpan(parts[0], parts[1], targetField);
+                            const startFrame = parts[0];
+                            const duration = parts[1];
+                            applyInputSpan(startFrame, duration, targetField);
                         }
                     }
                 });
             });
 
-            statusLogEl.innerHTML = `<span style="color: #a3be8c;">Parsed ${maxTimelineLength} frames. Ready.</span>`;
+            statusLogEl.innerHTML = `<span style="color: #a3be8c;">Successfully parsed ${maxTimelineLength} frames! Hold 'W' to drive.</span>`;
         } catch (err) {
-            statusLogEl.innerHTML = `<span style="color: #bf616a;">JSON Error: ${err.message}</span>`;
+            statusLogEl.innerHTML = `<span style="color: #bf616a;">Compiler Error: ${err.message}</span>`;
         }
     });
 
-    // 5. Main Processing Override
+    // 5. Native Thread Interception Core Channel
     const originalWorkerPostMessage = Worker.prototype.postMessage;
     Worker.prototype.postMessage = function(message, transfer) {
         if (message && message.messageType === 6) { 
