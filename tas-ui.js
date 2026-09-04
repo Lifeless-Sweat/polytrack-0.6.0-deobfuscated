@@ -38,7 +38,7 @@
     hud.id = 'tas-hud-panel';
     hud.innerHTML = `
         <div class="tas-header-row">
-            <div class="tas-title">🧩 LAG-FREE TAS ENGINE v2.8</div>
+            <div class="tas-title">🧩 FIXED PERFORMANCE TAS</div>
             <button id="tas-minimize-btn">[-]</button>
         </div>
         <div class="tas-content-wrapper">
@@ -110,7 +110,7 @@
         }
     }
 
-    // 4. Fixed JSON Compiler Pipeline (Restored working explicit index numbers)
+    // 4. Fixed JSON Compiler Pipeline
     document.getElementById('btn-load-json').addEventListener('click', () => {
         try {
             const rawData = JSON.parse(jsonInputEl.value);
@@ -129,13 +129,10 @@
                 const targetField = keyMappings[keyChar];
 
                 instructionsArray.forEach(instr => {
-                    // Scenario A: Infinite hold string ("0")
                     if (instr === "0") {
                         applyInputSpan(0, 60000, targetField);
                         return;
                     }
-
-                    // Scenario B: Repeating loop clusters starting with an exclamation mark ("!6852-45-80-10")
                     if (typeof instr === 'string' && instr.startsWith('!')) {
                         const parts = instr.substring(1).split('-').map(Number);
                         if (parts.length === 4) {
@@ -150,7 +147,6 @@
                             }
                         }
                     } 
-                    // Scenario C: Isolated fixed frame duration windows ("45-31")
                     else if (typeof instr === 'string' && instr.includes('-')) {
                         const parts = instr.split('-').map(Number);
                         if (parts.length === 2) {
@@ -168,52 +164,53 @@
         }
     });
 
-    // 5. High-Speed Physics Worker Hook Bridge 
-    const originalWorkerPostMessage = Worker.prototype.postMessage;
-    Worker.prototype.postMessage = function(message, transfer) {
-        // Universal detection channel for game physics update frames
-        if (message && (message.messageType === 6 || (message.up !== undefined && message.left !== undefined))) { 
+    // 5. ISOLATED WORKER HOOK HOX CHANNEL (Fixes track loading lag entirely!)
+    const OriginalWorker = window.Worker;
+    window.Worker = function(scriptURL, options) {
+        const workerInstance = new OriginalWorker(scriptURL, options);
 
-            // Freeze loop checkpoint gate: If you aren't holding W, pause car state and don't increment frames
-            if (maxTimelineLength > 0 && !isHoldingDriveKey) {
-                message.up = false;
-                message.down = false;
-                message.left = false;
-                message.right = false;
-                message.reset = false;
-                return originalWorkerPostMessage.apply(this, arguments);
-            }
+        // Target ONLY the simulation worker thread and leave track/asset workers alone
+        if (typeof scriptURL === 'string' && scriptURL.includes('simulation_worker')) {
+            const originalPostMessage = workerInstance.postMessage;
 
-            let frameState = timelineInputs[window.tasCurrentFrame];
+            workerInstance.postMessage = function(message, transfer) {
+                // Safely evaluate isolated inputs inside the matched simulation stream
+                if (message && (message.messageType === 6 || (message.up !== undefined && message.left !== undefined))) {
+                    
+                    if (maxTimelineLength > 0 && !isHoldingDriveKey) {
+                        message.up = false;
+                        message.down = false;
+                        message.left = false;
+                        message.right = false;
+                        message.reset = false;
+                        return originalPostMessage.apply(this, arguments);
+                    }
 
-            if (frameState) {
-                message.up = frameState.up;
-                message.down = frameState.down;
-                message.left = frameState.left;
-                message.right = frameState.right;
-                message.reset = frameState.reset;
-            } else {
-                message.up = false;
-                message.down = false;
-                message.left = false;
-                message.right = false;
-                message.reset = false;
+                    let frameState = timelineInputs[window.tasCurrentFrame];
 
-                if (window.tasCurrentFrame === maxTimelineLength + 1) {
-                    clearMainThreadInputs();
-                }
-            }
+                    if (frameState) {
+                        message.up = frameState.up;
+                        message.down = frameState.down;
+                        message.left = frameState.left;
+                        message.right = frameState.right;
+                        message.reset = frameState.reset;
+                    } else {
+                        message.up = false;
+                        message.down = false;
+                        message.left = false;
+                        message.right = false;
+                        message.reset = false;
 
-            window.tasCurrentFrame++;
-            
-            // Lightweight UI layout update interval saves heavy CPU lag
-            if (window.tasCurrentFrame % 60 === 0) {
-                frameCounterEl.innerText = window.tasCurrentFrame;
-                if (window.tasCurrentFrame <= maxTimelineLength) {
-                    statusLogEl.innerText = `Auto-Playing: Frame ${window.tasCurrentFrame}/${maxTimelineLength}`;
-                }
-            }
-        }
-        return originalWorkerPostMessage.apply(this, arguments);
-    };
-})();
+                        if (window.tasCurrentFrame === maxTimelineLength + 1) {
+                            clearMainThreadInputs();
+                        }
+                    }
+
+                    window.tasCurrentFrame++;
+                    
+                    if (window.tasCurrentFrame % 60 === 0) {
+                        frameCounterEl.innerText = window.tasCurrentFrame;
+                        if (window.tasCurrentFrame <= maxTimelineLength) {
+                            statusLogEl.innerText = `Auto-Playing: Frame ${window.tasCurrentFrame}/${maxTimelineLength}`;
+                        }
+                    }
