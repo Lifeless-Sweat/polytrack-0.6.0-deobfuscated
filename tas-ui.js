@@ -1,10 +1,10 @@
-(function createCwcTrueTasEngineV6() {
+(function createCwcTrueTasEngineV7() {
     // 1. Sleek Dashboard Node Layout Styling
     const style = document.createElement('style');
     style.innerHTML = `
         #cwc-tas-dashboard {
             position: absolute; top: 30px; right: 30px; width: 420px;
-            background: rgba(16, 22, 39, 0.96); border: 2px solid #3c5478;
+            background: rgba(16, 22, 39, 0.98); border: 2px solid #3c5478;
             color: #ffffff; font-family: 'Segoe UI', sans-serif; border-radius: 8px;
             z-index: 999999; box-shadow: 0 10px 30px rgba(0,0,0,0.7); display: block;
         }
@@ -25,7 +25,7 @@
     const dashboard = document.createElement('div');
     dashboard.id = 'cwc-tas-dashboard';
     dashboard.innerHTML = `
-        <div class="dash-title-bar">Settings</div>
+        <div class="dash-title-bar">Settings Panel</div>
         <div class="dash-inner-body">
             <div class="dash-section-lbl">Live Telemetry</div>
             <div class="dash-stat-row"><span>Simulation State:</span><span id="txt-sim-state" class="dash-badge" style="color:#bf616a;">PAUSED</span></div>
@@ -43,7 +43,7 @@
             <div class="dash-btn-footer">
                 <button class="dash-action-btn" id="act-load-macro">Load TAS</button>
                 <button class="dash-action-btn" id="act-export-macro">Export TAS</button>
-                <button class="dash-action-btn btn-green-apply" id="act-close-ui">Apply ✓</button>
+                <button class="dash-action-btn btn-green-apply" id="act-close-ui">Minimize ✓</button>
             </div>
         </div>
     `;
@@ -63,18 +63,20 @@
     const txtSimState = document.getElementById('txt-sim-state');
     const txtSimFrame = document.getElementById('txt-sim-frame');
 
-    // 4. Input Listener Configuration
+    // 4. Fixed Resilient Input Listener Configuration Matrix
     window.addEventListener('keydown', (e) => {
-        // Prevent action triggers while actively writing text inside macro prompts
+        // Prevent key conflicts if user is entering names inside file prompt dialogues
         if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
 
-        if (e.code === 'KeyU') {
+        const targetKey = e.key.toLowerCase();
+
+        if (targetKey === 'u') {
             e.preventDefault();
             dashboard.style.display = (dashboard.style.display === 'none') ? 'block' : 'none';
             return;
         }
 
-        if (e.code === 'KeyI' || e.code === 'Space') {
+        if (targetKey === 'i' || e.code === 'Space') {
             e.preventDefault();
             isGameSuspended = !isGameSuspended;
             txtSimState.innerText = isGameSuspended ? "PAUSED" : "RUNNING";
@@ -82,7 +84,7 @@
             return;
         }
 
-        if (e.code === 'KeyL') { 
+        if (targetKey === 'l') { 
             e.preventDefault();
             if (lastPolledCarPhysicsData) {
                 activeSaveStateCheckpoint = {
@@ -90,12 +92,22 @@
                     physicsSnapshot: JSON.parse(JSON.stringify(lastPolledCarPhysicsData)),
                     timelineBackup: JSON.parse(JSON.stringify(recordedInputsTimeline))
                 };
-                console.log(`Checkpoint baseline locked at frame: ${window.tasCurrentFrame}`);
+                txtSimState.innerText = "CHECKPOINT SET";
+                txtSimState.style.color = "#a3be8c";
+                setTimeout(() => {
+                    if (isGameSuspended) {
+                        txtSimState.innerText = "PAUSED";
+                        txtSimState.style.color = "#bf616a";
+                    } else {
+                        txtSimState.innerText = "RUNNING";
+                        txtSimState.style.color = "#a3be8c";
+                    }
+                }, 1000);
             }
             return;
         }
 
-        if (e.code === 'KeyK') { 
+        if (targetKey === 'k') { 
             e.preventDefault();
             if (activeSaveStateCheckpoint) {
                 fastForwardFramesRemaining = 50; 
@@ -106,6 +118,7 @@
             return;
         }
 
+        // Standard physics vehicle controls layout tracking mapping indices
         if (e.code === 'KeyW' || e.code === 'ArrowUp')    currentLiveKeyboardState.up = true;
         if (e.code === 'KeyS' || e.code === 'ArrowDown')  currentLiveKeyboardState.down = true;
         if (e.code === 'KeyA' || e.code === 'ArrowLeft')  currentLiveKeyboardState.left = true;
@@ -123,7 +136,7 @@
 
     document.getElementById('act-close-ui').addEventListener('click', () => { dashboard.style.display = 'none'; });
 
-    // 5. Save/Load Parsing Engine Logic Blocks
+    // 5. Macro Data Management Pipelines (Export & Import Format Processors)
     document.getElementById('act-export-macro').addEventListener('click', () => {
         const exportFormat = { instructions_v2: { w: [], a: [], s: [], d: [], r: [] } };
         const keyCharMap = { up: 'w', left: 'a', down: 's', right: 'd', reset: 'r' };
@@ -167,16 +180,4 @@
             Object.keys(compilerMap).forEach(char => {
                 const sequences = data[char] || [];
                 const targetField = compilerMap[char];
-                sequences.forEach(str => {
-                    if (str === "0") return;
-                    if (str.includes('-')) {
-                        const parts = str.split('-').map(Number);
-                        for(let i = 0; i < parts[1]; i++) {
-                            let f = parts[0] + i;
-                            if(!recordedInputsTimeline[f]) recordedInputsTimeline[f] = { up: false, down: false, left: false, right: false, reset: false };
-                            recordedInputsTimeline[f][targetField] = true;
-                        }
-                    }
-                });
-            });
-alert("Macro Timeline Loaded successfully!");} catch(e) { alert("Error parsing TAS file: " + e.message); }});// 6. Hooking the Web Worker Simulation Thread Channelconst OriginalWorker = window.Worker;window.Worker = function(scriptURL, options) {const workerInstance = new OriginalWorker(scriptURL, options);if (typeof scriptURL === 'string' && scriptURL.includes('simulation_worker')) {const originalPostMessage = workerInstance.postMessage;workerInstance.postMessage = function(message, transfer) {if (message && (message.messageType === 6 || message.up !== undefined)) {if (message.linearVelocity || message.position) lastPolledCarPhysicsData = message;// Fast-Forward Core Loop Gateif (fastForwardFramesRemaining > 0) {fastForwardFramesRemaining--;if (fastForwardFramesRemaining === 0) {isGameSuspended = true;txtSimState.innerText = "PAUSED";txtSimState.style.color = "#bf616a";}}if (isGameSuspended) {message.up = false; message.down = false; message.left = false; message.right = false; message.reset = false;return originalPostMessage.apply(this, arguments);}if (activeSaveStateCheckpoint && window.tasCurrentFrame === activeSaveStateCheckpoint.frame) {if (activeSaveStateCheckpoint.physicsSnapshot.position) message.position = activeSaveStateCheckpoint.physicsSnapshot.position;if (activeSaveStateCheckpoint.physicsSnapshot.linearVelocity) message.linearVelocity = activeSaveStateCheckpoint.physicsSnapshot.linearVelocity;if (activeSaveStateCheckpoint.physicsSnapshot.rotation) message.rotation = activeSaveStateCheckpoint.physicsSnapshot.rotation;}if (!recordedInputsTimeline[window.tasCurrentFrame]) {recordedInputsTimeline[window.tasCurrentFrame] = {up: currentLiveKeyboardState.up, down: currentLiveKeyboardState.down,left: currentLiveKeyboardState.left, right: currentLiveKeyboardState.right, reset: currentLiveKeyboardState.reset};}let frameState = recordedInputsTimeline[window.tasCurrentFrame];message.up = frameState.up; message.down = frameState.down;message.left = frameState.left; message.right = frameState.right; message.reset = frameState.reset;window.tasCurrentFrame++;if (window.tasCurrentFrame % 10 === 0) txtSimFrame.innerText = window.tasCurrentFrame;}return originalPostMessage.apply(this, arguments);};}return workerInstance;};window.Worker.prototype = OriginalWorker.prototype;})();
+sequences.forEach(str => {if (str === "0") return;if (str.includes('-')) {const parts = str.split('-').map(Number);for(let i = 0; i < parts[1]; i++) {let f = parts[0] + i;if(!recordedInputsTimeline[f]) recordedInputsTimeline[f] = { up: false, down: false, left: false, right: false, reset: false };recordedInputsTimeline[f][targetField] = true;}}});});alert("Macro Timeline Loaded successfully!");} catch(e) { alert("Error parsing TAS file: " + e.message); }});// 6. Native Interception Wrapper Over Web Worker Channel Pipelinesconst OriginalWorker = window.Worker;window.Worker = function(scriptURL, options) {const workerInstance = new OriginalWorker(scriptURL, options);if (typeof scriptURL === 'string' && scriptURL.includes('simulation_worker')) {const originalPostMessage = workerInstance.postMessage;workerInstance.postMessage = function(message, transfer) {if (message && (message.messageType === 6 || message.up !== undefined)) {if (message.linearVelocity || message.position) lastPolledCarPhysicsData = message;// Fast-Forward skip state execution pipelineif (fastForwardFramesRemaining > 0) {fastForwardFramesRemaining--;if (fastForwardFramesRemaining === 0) {isGameSuspended = true;txtSimState.innerText = "PAUSED";txtSimState.style.color = "#bf616a";}}if (isGameSuspended) {message.up = false; message.down = false; message.left = false; message.right = false; message.reset = false;return originalPostMessage.apply(this, arguments);}if (activeSaveStateCheckpoint && window.tasCurrentFrame === activeSaveStateCheckpoint.frame) {if (activeSaveStateCheckpoint.physicsSnapshot.position) message.position = activeSaveStateCheckpoint.physicsSnapshot.position;if (activeSaveStateCheckpoint.physicsSnapshot.linearVelocity) message.linearVelocity = activeSaveStateCheckpoint.physicsSnapshot.linearVelocity;if (activeSaveStateCheckpoint.physicsSnapshot.rotation) message.rotation = activeSaveStateCheckpoint.physicsSnapshot.rotation;}if (!recordedInputsTimeline[window.tasCurrentFrame]) {recordedInputsTimeline[window.tasCurrentFrame] = {up: currentLiveKeyboardState.up, down: currentLiveKeyboardState.down,left: currentLiveKeyboardState.left, right: currentLiveKeyboardState.right, reset: currentLiveKeyboardState.reset};}let frameState = recordedInputsTimeline[window.tasCurrentFrame];message.up = frameState.up; message.down = frameState.down;message.left = frameState.left; message.right = frameState.right; message.reset = frameState.reset;window.tasCurrentFrame++;if (window.tasCurrentFrame % 10 === 0) txtSimFrame.innerText = window.tasCurrentFrame;}return originalPostMessage.apply(this, arguments);};}return workerInstance;};window.Worker.prototype = OriginalWorker.prototype;})();
