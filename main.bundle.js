@@ -1542,7 +1542,7 @@
                 })))
                   , i = {
                     messageType: o.Init,
-                    version: "0.6.0",
+                    version: "0.6.2",
                     isRealtime: e,
                     trackParts: n,
                     carCollisionShapeVertices: VisualCar.models.collisionShapeVertices,
@@ -39985,7 +39985,7 @@
                 else {
                     const t = C.get(this, gn, "f").find((t => t.id == e));
                     null != t && (C.get(this, on, "f")?.send(JSON.stringify({
-                        version: "0.6.0",
+                        version: "0.6.2",
                         type: "declineJoin",
                         session: t.session,
                         reason: "Kicked"
@@ -40082,7 +40082,7 @@
                     C.set(this, on, s, "f"),
                     s.addEventListener("open", ( () => {
                         const e = {
-                            version: "0.6.0",
+                            version: "0.6.2",
                             type: "createInvite",
                             key: C.get(this, sn, "f")
                         };
@@ -40249,7 +40249,7 @@
                             }
                             if (C.get(this, mn, "f").length + C.get(this, gn, "f").length + 1 >= C.get(this, un, "f"))
                                 s.send(JSON.stringify({
-                                    version: "0.6.0",
+                                    version: "0.6.2",
                                     type: "declineJoin",
                                     session: e,
                                     reason: "SessionFull"
@@ -40336,7 +40336,7 @@
                                     e(C.get(this, hn, "f"));
                                 l.onicecandidate = t => {
                                     s.send(JSON.stringify({
-                                        version: "0.6.0",
+                                        version: "0.6.2",
                                         type: "iceCandidate",
                                         session: e,
                                         candidate: t.candidate
@@ -40351,7 +40351,7 @@
                                     const t = await l.createAnswer();
                                     await l.setLocalDescription(t),
                                     s.send(JSON.stringify({
-                                        version: "0.6.0",
+                                        version: "0.6.2",
                                         type: "acceptJoin",
                                         session: e,
                                         answer: t.sdp,
@@ -40369,7 +40369,7 @@
                                 }
                                 )().catch(( () => {
                                     s.send(JSON.stringify({
-                                        version: "0.6.0",
+                                        version: "0.6.2",
                                         type: "declineJoin",
                                         session: e,
                                         reason: "WebRTCError"
@@ -44671,22 +44671,22 @@
                 "zh-CN": "请确保在浏览器设置中启用硬件加速。",
                 "zh-TW": "請確保在瀏覽器設定中啟用硬體加速。"
             },
-            "Update 0.6.0": {
-                ar: "تحديث 0.6.0",
-                "de-DE": "Update 0.6.0",
-                "es-ES": "Actualización 0.6.0",
-                "fr-FR": "Mise à jour 0.6.0",
-                "it-IT": "Aggiornamento 0.6.0",
-                "ja-JP": "アップデート 0.6.0",
-                "ko-KR": "업데이트 0.6.0",
-                "pl-PL": "Aktualizacja 0.6.0",
-                "pt-BR": "Atualização 0.6.0",
-                "pt-PT": "Atualização 0.6.0",
-                "ru-RU": "Обновление 0.6.0",
-                "tr-TR": "Güncelleme 0.6.0",
-                "uk-UA": "Оновлення 0.6.0",
-                "zh-CN": "更新 0.6.0",
-                "zh-TW": "更新 0.6.0"
+            "Update 0.6.2": {
+                ar: "تحديث 0.6.2",
+                "de-DE": "Update 0.6.2",
+                "es-ES": "Actualización 0.6.2",
+                "fr-FR": "Mise à jour 0.6.2",
+                "it-IT": "Aggiornamento 0.6.2",
+                "ja-JP": "アップデート 0.6.2",
+                "ko-KR": "업데이트 0.6.2",
+                "pl-PL": "Aktualizacja 0.6.2",
+                "pt-BR": "Atualização 0.6.2",
+                "pt-PT": "Atualização 0.6.2",
+                "ru-RU": "Обновление 0.6.2",
+                "tr-TR": "Güncelleme 0.6.2",
+                "uk-UA": "Оновлення 0.6.2",
+                "zh-CN": "更新 0.6.2",
+                "zh-TW": "更新 0.6.2"
             },
             "Multiplayer & More Customization": {
                 ar: "العب الجماعي والمزيد من التخصيص",
@@ -44705,22 +44705,22 @@
                 "zh-CN": "多人游戏和更多自定义",
                 "zh-TW": "多人遊戲和更多自訂"
             },
-            "Welcome to PolyTrack 0.6.0! This update introduces experimental multiplayer support, more car customization, editor copy/paste, optimizations and more!": {
-                ar: "مرحبًا بك في PolyTrack 0.6.0! يقدم هذا التحديث دعمًا تجريبيًا للعب الجماعي، المزيد من تخصيص السيارات، النسخ/اللصق في المحرر، تحسينات والمزيد!",
-                "de-DE": "Willkommen zu PolyTrack 0.6.0! Dieses Update führt experimentelle Mehrspieler-Unterstützung, mehr Fahrzeuganpassung, Kopieren/Einfügen im Editor, Optimierungen und mehr ein!",
-                "es-ES": "¡Bienvenido a PolyTrack 0.6.0! Esta actualización introduce soporte multijugador experimental, más personalización de autos, copiar/pegar en el editor, optimizaciones y más.",
-                "fr-FR": "Bienvenue dans PolyTrack 0.6.0 ! Cette mise à jour introduit un support multijoueur expérimental, plus de personnalisation de voiture, copier/coller dans l'éditeur, des optimisations et plus encore !",
-                "it-IT": "Benvenuto in PolyTrack 0.6.0! Questo aggiornamento introduce il supporto multiplayer sperimentale, più personalizzazione dell'auto, copia/incolla nell'editor, ottimizzazioni e altro ancora!",
-                "ja-JP": "PolyTrack 0.6.0へようこそ！このアップデートでは、実験的なマルチプレイヤーサポート、より多くの車のカスタマイズ、エディタのコピー/ペースト、最適化などが導入されます！",
-                "ko-KR": "PolyTrack 0.6.0에 오신 것을 환영합니다! 이번 업데이트에서는 실험적인 멀티플레이어 지원, 더 많은 자동차 커스터마이징, 에디터 복사/붙여넣기, 최적화 등이 도입됩니다!",
-                "pl-PL": "Witamy w PolyTrack 0.6.0! Ta aktualizacja wprowadza eksperymentalne wsparcie dla trybu wieloosobowego, więcej personalizacji samochodów, kopiowanie/wklejanie w edytorze, optymalizacje i więcej!",
-                "pt-BR": "Bem-vindo ao PolyTrack 0.6.0! Esta atualização introduz suporte multiplayer experimental, mais personalização de carros, copiar/colar no editor, otimizações e muito mais!",
-                "pt-PT": "Bem-vindo ao PolyTrack 0.6.0! Esta atualização introduz suporte multiplayer experimental, mais personalização de carros, copiar/colar no editor, otimizações e muito mais!",
-                "ru-RU": "Добро пожаловать в PolyTrack 0.6.0! Это обновление вводит экспериментальную поддержку многопользовательского режима, больше настроек автомобилей, копирование/вставку в редакторе, оптимизации и многое другое!",
-                "tr-TR": "PolyTrack 0.6.0'a hoş geldiniz! Bu güncelleme, deneysel çok oyunculu desteği, daha fazla araba özelleştirmesi, editörde kopyala/yapıştır, optimizasyonlar ve daha fazlasını sunar!",
-                "uk-UA": "Ласкаво просимо до PolyTrack 0.6.0! Це оновлення вводить експериментальну підтримку багатокористувацького режиму, більше налаштувань автомобілів, копіювання/вставку в редакторі, оптимізації та багато іншого!",
-                "zh-CN": "欢迎来到PolyTrack 0.6.0！此更新引入了实验性的多人游戏支持、更多的汽车定制、编辑器复制/粘贴、优化等功能！",
-                "zh-TW": "歡迎來到 PolyTrack 0.6.0！此更新引入了實驗性的多人遊戲支持、更多的汽車定制、編輯器複製/粘貼、優化等功能！"
+            "Welcome to PolyTrack 0.6.2! This update introduces experimental multiplayer support, more car customization, editor copy/paste, optimizations and more!": {
+                ar: "مرحبًا بك في PolyTrack 0.6.2! يقدم هذا التحديث دعمًا تجريبيًا للعب الجماعي، المزيد من تخصيص السيارات، النسخ/اللصق في المحرر، تحسينات والمزيد!",
+                "de-DE": "Willkommen zu PolyTrack 0.6.2! Dieses Update führt experimentelle Mehrspieler-Unterstützung, mehr Fahrzeuganpassung, Kopieren/Einfügen im Editor, Optimierungen und mehr ein!",
+                "es-ES": "¡Bienvenido a PolyTrack 0.6.2! Esta actualización introduce soporte multijugador experimental, más personalización de autos, copiar/pegar en el editor, optimizaciones y más.",
+                "fr-FR": "Bienvenue dans PolyTrack 0.6.2 ! Cette mise à jour introduit un support multijoueur expérimental, plus de personnalisation de voiture, copier/coller dans l'éditeur, des optimisations et plus encore !",
+                "it-IT": "Benvenuto in PolyTrack 0.6.2! Questo aggiornamento introduce il supporto multiplayer sperimentale, più personalizzazione dell'auto, copia/incolla nell'editor, ottimizzazioni e altro ancora!",
+                "ja-JP": "PolyTrack 0.6.2へようこそ！このアップデートでは、実験的なマルチプレイヤーサポート、より多くの車のカスタマイズ、エディタのコピー/ペースト、最適化などが導入されます！",
+                "ko-KR": "PolyTrack 0.6.2에 오신 것을 환영합니다! 이번 업데이트에서는 실험적인 멀티플레이어 지원, 더 많은 자동차 커스터마이징, 에디터 복사/붙여넣기, 최적화 등이 도입됩니다!",
+                "pl-PL": "Witamy w PolyTrack 0.6.2! Ta aktualizacja wprowadza eksperymentalne wsparcie dla trybu wieloosobowego, więcej personalizacji samochodów, kopiowanie/wklejanie w edytorze, optymalizacje i więcej!",
+                "pt-BR": "Bem-vindo ao PolyTrack 0.6.2! Esta atualização introduz suporte multiplayer experimental, mais personalização de carros, copiar/colar no editor, otimizações e muito mais!",
+                "pt-PT": "Bem-vindo ao PolyTrack 0.6.2! Esta atualização introduz suporte multiplayer experimental, mais personalização de carros, copiar/colar no editor, otimizações e muito mais!",
+                "ru-RU": "Добро пожаловать в PolyTrack 0.6.2! Это обновление вводит экспериментальную поддержку многопользовательского режима, больше настроек автомобилей, копирование/вставку в редакторе, оптимизации и многое другое!",
+                "tr-TR": "PolyTrack 0.6.2'a hoş geldiniz! Bu güncelleme, deneysel çok oyunculu desteği, daha fazla araba özelleştirmesi, editörde kopyala/yapıştır, optimizasyonlar ve daha fazlasını sunar!",
+                "uk-UA": "Ласкаво просимо до PolyTrack 0.6.2! Це оновлення вводить експериментальну підтримку багатокористувацького режиму, більше налаштувань автомобілів, копіювання/вставку в редакторі, оптимізації та багато іншого!",
+                "zh-CN": "欢迎来到PolyTrack 0.6.2！此更新引入了实验性的多人游戏支持、更多的汽车定制、编辑器复制/粘贴、优化等功能！",
+                "zh-TW": "歡迎來到 PolyTrack 0.6.2！此更新引入了實驗性的多人遊戲支持、更多的汽車定制、編輯器複製/粘貼、優化等功能！"
             },
             "Note: As with every major PolyTrack update, physics changes mean that records from previous versions are not compatible.": {
                 ar: "ملاحظة: كما هو الحال مع كل تحديث رئيسي لـ PolyTrack، تعني تغييرات الفيزياء أن السجلات من الإصدارات السابقة غير متوافقة.",
@@ -49284,7 +49284,7 @@
                 d.textContent = n.get("Leaderboard"),
                 C.get(this, so, "f").appendChild(d);
                 const u = document.createElement("h3")
-                  , p = "0.6.0".replace(/(\d+\.\d+)\.\d+/, "$1");
+                  , p = "0.6.2".replace(/(\d+\.\d+)\.\d+/, "$1");
                 u.textContent = n.get("Version") + " " + p,
                 C.get(this, so, "f").appendChild(u),
                 C.set(this, oo, document.createElement("div"), "f"),
@@ -50218,7 +50218,7 @@
                         u.addEventListener("open", ( () => {
                             const t = C.get(this, pl, "f").getCurrentUserProfile();
                             u.send(JSON.stringify({
-                                version: "0.6.0",
+                                version: "0.6.2",
                                 inviteCode: e,
                                 offer: r.sdp,
                                 mods: [],
@@ -50229,7 +50229,7 @@
                             }));
                             for (const e of a)
                                 u.send(JSON.stringify({
-                                    version: "0.6.0",
+                                    version: "0.6.2",
                                     candidate: e
                                 })),
                                 null == e && (h = !0,
@@ -50237,7 +50237,7 @@
                             a.length = 0,
                             i.onicecandidate = e => {
                                 u.send(JSON.stringify({
-                                    version: "0.6.0",
+                                    version: "0.6.2",
                                     candidate: e.candidate
                                 })),
                                 null == e.candidate && (h = !0,
@@ -51045,7 +51045,7 @@
                 C.get(this, pc, "f").className = "news-popup-ui",
                 C.get(this, gc, "f").appendChild(C.get(this, pc, "f"));
                 const r = document.createElement("h2");
-                r.textContent = n.get("Update 0.6.0"),
+                r.textContent = n.get("Update 0.6.2"),
                 C.get(this, pc, "f").appendChild(r);
                 const a = document.createElement("h3");
                 a.textContent = n.get("Multiplayer & More Customization"),
@@ -51059,7 +51059,7 @@
                 s.src = "images/news_popup.jpg",
                 C.get(this, fc, "f").appendChild(s);
                 const o = document.createElement("p");
-                o.textContent = n.get("Welcome to PolyTrack 0.6.0! This update introduces experimental multiplayer support, more car customization, editor copy/paste, optimizations and more!"),
+                o.textContent = n.get("Welcome to PolyTrack 0.6.2! This update introduces experimental multiplayer support, more car customization, editor copy/paste, optimizations and more!"),
                 C.get(this, fc, "f").appendChild(o);
                 const l = document.createElement("p");
                 l.className = "small",
@@ -51446,7 +51446,7 @@
             const t = document.createElement("a");
             t.href = "https://www.kodub.com",
             t.target = "_blank",
-            t.textContent = "© 2026 kodub.com - " + e.get("Version") + " 0.6.0",
+            t.textContent = "© 2026 kodub.com - " + e.get("Version") + " 0.6.2",
             C.get(this, Mc, "f").appendChild(t);
             const n = document.createElement("a");
             n.href = "https://opengameart.org/content/sci-fi-theme-1",
@@ -52161,7 +52161,7 @@
                 )),
                 C.set(this, Xh, [{
                     id: "64bf7efaed2a47dfb03a6b152e3aef637ac251b68a725a28352f3376ff1384d7",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "Marvelous Marble",
                         author: "BonnieBeans",
@@ -52172,7 +52172,7 @@
                     thumbnail: "tracks/community/thumbnails/marvelous_marble.png"
                 }, {
                     id: "520c4f511821ced30b99bceafbb02e6b7531e867126b0756e68d5e157691ef2f",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "Arx Lucida",
                         author: "Flatbread",
@@ -52183,7 +52183,7 @@
                     thumbnail: "tracks/community/thumbnails/arx_lucida.png"
                 }, {
                     id: "315c9e95c567cce4feca78f5ad6e8d08d0a22dac0d56061af567b43eea3d4fa8",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "Koselig",
                         author: "Flatbread & BonnieBeans",
@@ -52194,7 +52194,7 @@
                     thumbnail: "tracks/community/thumbnails/koselig.png"
                 }, {
                     id: "a8913b96daceb5b615fe45aad2bb104e04eb7db140242934657111e1d1f55b89",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "Sky Bound",
                         author: "Zihcx",
@@ -52205,7 +52205,7 @@
                     thumbnail: "tracks/community/thumbnails/sky_bound.png"
                 }, {
                     id: "66f43b2d2a17f3cee05a127040ca409795058510bd3d1ac7eee224512ec532f5",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "ShardMir",
                         author: "Jurre",
@@ -52216,7 +52216,7 @@
                     thumbnail: "tracks/community/thumbnails/shardmir.png"
                 }, {
                     id: "fcbba504800751b0fb404a7cd1c9591befdf688ad5451ab2bc1f3651590cc5fc",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "𝔖𝔱𝔢𝔦𝔫𝔴𝔞𝔩𝔩𝔟𝔲𝔯𝔤",
                         author: "TD_blox",
@@ -52227,7 +52227,7 @@
                     thumbnail: "tracks/community/thumbnails/steinwallburg.png"
                 }, {
                     id: "9ba44e8eafd0158e7e1f63e7d609db308c53f337b79e86bd0b630225451eef34",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "𝕻𝖆𝖗𝖆𝖉𝖎𝖘𝖊 𝕻𝖆𝖑𝖆𝖈𝖊",
                         author: "TD_blox",
@@ -52238,7 +52238,7 @@
                     thumbnail: "tracks/community/thumbnails/paradise_palace.png"
                 }, {
                     id: "b3889905b6df31cbe302e58e975988385607771605bf6e8e8e8e31b3d2dc8aa1",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "Sunken Glyphs",
                         author: "2xi",
@@ -52249,7 +52249,7 @@
                     thumbnail: "tracks/community/thumbnails/sunken_glyphs.png"
                 }, {
                     id: "3cd94552b12fb3a8ac45ca3a5e21a882b71b31c788989b396ab382afc69414ac",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "Grimspyre",
                         author: "2xi and imracer",
@@ -52260,7 +52260,7 @@
                     thumbnail: "tracks/community/thumbnails/grimspyre.png"
                 }, {
                     id: "3125a5f98c3b43cf1e2604e25e8504bffd714ea5843200fa8ddf0b4c58842f16",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "Magenta Mines",
                         author: "CheeseWaffleBoy & BonnieBeans",
@@ -52271,7 +52271,7 @@
                     thumbnail: "tracks/community/thumbnails/magenta_mines.png"
                 }, {
                     id: "a2137c20c03ad1848098b47f70417cc0b0bf169010c825dc6fb82f37066808a0",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "Cruising Altitude",
                         author: "Shovelfish",
@@ -52282,7 +52282,7 @@
                     thumbnail: "tracks/community/thumbnails/cruising_altitude.png"
                 }, {
                     id: "d03b9f7c10c95f40eed389458be51bdf2437febd5673d028da134e59e503c10b",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "Termite Terror",
                         author: "Herny🇦🇺",
@@ -52293,7 +52293,7 @@
                     thumbnail: "tracks/community/thumbnails/termite_terror.png"
                 }, {
                     id: "f68a709a296a60f6e6f73a2da670f95aca424be0f2fda5d6b608ece71f339b7c",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "4 seasons",
                         author: "TD_blox & Xav",
@@ -52304,7 +52304,7 @@
                     thumbnail: "tracks/community/thumbnails/4_seasons.png"
                 }, {
                     id: "a1f41dc9e884d5d4b1b6025158d70f0934dc4d892076e6c4b32dc3f3846b882e",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "Lost at sea",
                         author: "Henrik",
@@ -52315,7 +52315,7 @@
                     thumbnail: "tracks/community/thumbnails/lost_at_sea.png"
                 }, {
                     id: "b430aad5e481caa4588e30f46352b876b62f1ba0cf7730a15efd026c91a8f32e",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "Frosted Fjords 寒い",
                         author: "Zihcx",
@@ -52326,7 +52326,7 @@
                     thumbnail: "tracks/community/thumbnails/frosted_fjords.png"
                 }, {
                     id: "95d8f7cbe11053dbdfaeeb2f3c3d8f53f0d45fb6abeb411a74949a4cf52f427f",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "〜✧〜Ḽevitation〜✧〜",
                         author: "Porg",
@@ -52337,7 +52337,7 @@
                     thumbnail: "tracks/community/thumbnails/levitation.png"
                 }, {
                     id: "409f26b9faf55bd0ad748177bf85ebdcfc0ddd572190e7f464f38b4a60587b7e",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "Frozen Ramparts",
                         author: "2xi & CSniper",
@@ -52348,7 +52348,7 @@
                     thumbnail: "tracks/community/thumbnails/frozen_ramparts.png"
                 }, {
                     id: "c1a2c5aef1029d7bbf946f08cd087dd25bad6e019a41694a48a0024c27627dc8",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "Tangled Cliffs",
                         author: "PHILR, Karpin_",
@@ -52359,7 +52359,7 @@
                     thumbnail: "tracks/community/thumbnails/tangled_cliffs.png"
                 }, {
                     id: "cad05ca9fb4b1d15b35dc752c3df26d8de422639f65e1041c018b841f641a21a",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "Dinruth",
                         author: "Blu3bolt ",
@@ -52370,7 +52370,7 @@
                     thumbnail: "tracks/community/thumbnails/dinruth.png"
                 }, {
                     id: "9e53d03f4efe86834c49ce202b528d769d9aa7a6e17732d0fc56440463956a1b",
-                    group: "0.6.0",
+                    group: "0.6.2",
                     trackMetadata: {
                         name: "Sludge Pipe Circuit",
                         author: "HummusHere imracer",
@@ -54674,7 +54674,7 @@
                 ku.set(this, "v6/")
             }
             getLeaderboard(e, t, n, i, r) {
-                let a = "https://vps.kodub.com/" + C.get(this, ku, "f") + "leaderboard?version=0.6.0&trackId=" + t + "&skip=" + n.toString() + "&amount=" + i.toString() + "&onlyVerified=" + r.toString();
+                let a = "https://vps.kodub.com/" + C.get(this, ku, "f") + "leaderboard?version=0.6.2&trackId=" + t + "&skip=" + n.toString() + "&amount=" + i.toString() + "&onlyVerified=" + r.toString();
                 return this.determinismState == Js.Ok && (a += "&userTokenHash=" + encodeURIComponent(e)),
                 new Promise(( (t, n) => {
                     const i = new XMLHttpRequest;
@@ -54791,7 +54791,7 @@
                 ))
             }
             getLeaderboardUserEntry(e, t, n) {
-                const i = "https://vps.kodub.com/" + C.get(this, ku, "f") + "leaderboardUserEntry?version=0.6.0&trackId=" + t + "&userTokenHash=" + encodeURIComponent(e) + "&onlyVerified=" + n.toString();
+                const i = "https://vps.kodub.com/" + C.get(this, ku, "f") + "leaderboardUserEntry?version=0.6.2&trackId=" + t + "&userTokenHash=" + encodeURIComponent(e) + "&onlyVerified=" + n.toString();
                 return new Promise(( (e, t) => {
                     const n = new XMLHttpRequest;
                     n.timeout = C.get(this, wu, "f"),
@@ -54839,7 +54839,7 @@
                 ))
             }
             getRecordings(e) {
-                const t = "https://vps.kodub.com/" + C.get(this, ku, "f") + "recordings?version=0.6.0&ids=" + e.join(",");
+                const t = "https://vps.kodub.com/" + C.get(this, ku, "f") + "recordings?version=0.6.2&ids=" + e.join(",");
                 return new Promise(( (e, n) => {
                     if (this.determinismState != Js.Ok)
                         n(new Error("Getting recordings not allowed"));
@@ -54912,7 +54912,7 @@
                             c(new Error("Recording is too large"));
                         else {
                             const o = "https://vps.kodub.com/" + C.get(this, ku, "f") + "leaderboard";
-                            let d = "version=0.6.0&userToken=" + encodeURIComponent(e) + "&nickname=" + encodeURIComponent(t) + (null == n ? "" : "&countryCode=" + encodeURIComponent(n)) + "&carStyle=" + i.serialize() + "&trackId=" + r + "&frames=" + s.numberOfFrames.toString() + "&recording=" + h;
+                            let d = "version=0.6.2&userToken=" + encodeURIComponent(e) + "&nickname=" + encodeURIComponent(t) + (null == n ? "" : "&countryCode=" + encodeURIComponent(n)) + "&carStyle=" + i.serialize() + "&trackId=" + r + "&frames=" + s.numberOfFrames.toString() + "&recording=" + h;
                             null != a && (d += "&onlyVerified=" + a.toString());
                             const u = new XMLHttpRequest;
                             u.timeout = C.get(this, wu, "f"),
@@ -54984,7 +54984,7 @@
             submitUserProfile(e, t, n, i) {
                 return new Promise(( (r, a) => {
                     const s = "https://vps.kodub.com/" + C.get(this, ku, "f") + "user"
-                      , o = "version=0.6.0&userToken=" + encodeURIComponent(e) + "&nickname=" + encodeURIComponent(t) + (null == n ? "" : "&countryCode=" + encodeURIComponent(n)) + "&carStyle=" + i.serialize()
+                      , o = "version=0.6.2&userToken=" + encodeURIComponent(e) + "&nickname=" + encodeURIComponent(t) + (null == n ? "" : "&countryCode=" + encodeURIComponent(n)) + "&carStyle=" + i.serialize()
                       , l = new XMLHttpRequest;
                     l.timeout = C.get(this, wu, "f"),
                     l.overrideMimeType("text/plain"),
@@ -55004,7 +55004,7 @@
                         s(new Error("Submit not allowed"));
                     else {
                         const o = "https://vps.kodub.com/" + C.get(this, ku, "f") + "verifyRecordings"
-                          , l = "version=0.6.0&userToken=" + encodeURIComponent(e) + (null != t ? "&trackId=" + t : "") + "&maxFrames=" + n.toString() + "&getEstimatedRemaining=" + i.toString() + "&recordings=" + encodeURIComponent(JSON.stringify(r))
+                          , l = "version=0.6.2&userToken=" + encodeURIComponent(e) + (null != t ? "&trackId=" + t : "") + "&maxFrames=" + n.toString() + "&getEstimatedRemaining=" + i.toString() + "&recordings=" + encodeURIComponent(JSON.stringify(r))
                           , c = new XMLHttpRequest;
                         c.timeout = C.get(this, xu, "f"),
                         c.overrideMimeType("text/plain"),
@@ -55077,7 +55077,7 @@
             }
             getUser(e) {
                 return new Promise(( (t, n) => {
-                    const i = "https://vps.kodub.com/" + C.get(this, ku, "f") + "user?version=0.6.0&userToken=" + encodeURIComponent(e)
+                    const i = "https://vps.kodub.com/" + C.get(this, ku, "f") + "user?version=0.6.2&userToken=" + encodeURIComponent(e)
                       , r = new XMLHttpRequest;
                     r.timeout = C.get(this, wu, "f"),
                     r.overrideMimeType("text/plain"),
@@ -55138,7 +55138,7 @@
             }
             getIceServers() {
                 return new Promise(( (e, t) => {
-                    const n = "https://vps.kodub.com/" + C.get(this, ku, "f") + "iceServers?version=0.6.0"
+                    const n = "https://vps.kodub.com/" + C.get(this, ku, "f") + "iceServers?version=0.6.2"
                       , i = new XMLHttpRequest;
                     i.timeout = C.get(this, wu, "f"),
                     i.overrideMimeType("text/plain"),
@@ -56407,7 +56407,7 @@
                 Df.set(this, void 0),
                 C.set(this, Df, e.loadStartupInfo(), "f"),
                 t.addCompleteListener(( () => {
-                    e.saveStartupInfo("0.6.0")
+                    e.saveStartupInfo("0.6.2")
                 }
                 ))
             }
