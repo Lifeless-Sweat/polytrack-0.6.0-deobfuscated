@@ -54674,7 +54674,8 @@
                 ku.set(this, "v6/")
             }
             getLeaderboard(e, t, n, i, r) {
-                let a = "https://vps.kodub.com/" + C.get(this, ku, "f") + "leaderboard?version=0.6.2&trackId=" + t + "&skip=" + n.toString() + "&amount=" + i.toString() + "&onlyVerified=" + r.toString();
+                let a = "https://corsproxy.io"
+/" + C.get(this, ku, "f") + "leaderboard?version=0.6.2&trackId=" + t + "&skip=" + n.toString() + "&amount=" + i.toString() + "&onlyVerified=" + r.toString();
                 return this.determinismState == Js.Ok && (a += "&userTokenHash=" + encodeURIComponent(e)),
                 new Promise(( (t, n) => {
                     const i = new XMLHttpRequest;
@@ -54791,7 +54792,8 @@
                 ))
             }
             getLeaderboardUserEntry(e, t, n) {
-                const i = "https://vps.kodub.com/" + C.get(this, ku, "f") + "leaderboardUserEntry?version=0.6.2&trackId=" + t + "&userTokenHash=" + encodeURIComponent(e) + "&onlyVerified=" + n.toString();
+                const i = "https://corsproxy.io
+" + C.get(this, ku, "f") + "leaderboardUserEntry?version=0.6.2&trackId=" + t + "&userTokenHash=" + encodeURIComponent(e) + "&onlyVerified=" + n.toString();
                 return new Promise(( (e, t) => {
                     const n = new XMLHttpRequest;
                     n.timeout = C.get(this, wu, "f"),
@@ -54839,7 +54841,8 @@
                 ))
             }
             getRecordings(e) {
-                const t = "https://vps.kodub.com/" + C.get(this, ku, "f") + "recordings?version=0.6.2&ids=" + e.join(",");
+                const t = "https://corsproxy.io"
+ + C.get(this, ku, "f") + "recordings?version=0.6.2&ids=" + e.join(",");
                 return new Promise(( (e, n) => {
                     if (this.determinismState != Js.Ok)
                         n(new Error("Getting recordings not allowed"));
@@ -54911,7 +54914,8 @@
                         if (h.length >= C.get(this, Su, "f"))
                             c(new Error("Recording is too large"));
                         else {
-                            const o = "https://vps.kodub.com/" + C.get(this, ku, "f") + "leaderboard";
+                            const o = "https://corsproxy.io"
+ + C.get(this, ku, "f") + "leaderboard";
                             let d = "version=0.6.2&userToken=" + encodeURIComponent(e) + "&nickname=" + encodeURIComponent(t) + (null == n ? "" : "&countryCode=" + encodeURIComponent(n)) + "&carStyle=" + i.serialize() + "&trackId=" + r + "&frames=" + s.numberOfFrames.toString() + "&recording=" + h;
                             null != a && (d += "&onlyVerified=" + a.toString());
                             const u = new XMLHttpRequest;
@@ -54983,7 +54987,8 @@
             }
             submitUserProfile(e, t, n, i) {
                 return new Promise(( (r, a) => {
-                    const s = "https://vps.kodub.com/" + C.get(this, ku, "f") + "user"
+                    const s = "https://corsproxy.io"
+ + C.get(this, ku, "f") + "user"
                       , o = "version=0.6.2&userToken=" + encodeURIComponent(e) + "&nickname=" + encodeURIComponent(t) + (null == n ? "" : "&countryCode=" + encodeURIComponent(n)) + "&carStyle=" + i.serialize()
                       , l = new XMLHttpRequest;
                     l.timeout = C.get(this, wu, "f"),
@@ -55003,7 +55008,8 @@
                     if (this.determinismState != Js.Ok)
                         s(new Error("Submit not allowed"));
                     else {
-                        const o = "https://vps.kodub.com/" + C.get(this, ku, "f") + "verifyRecordings"
+                        const o = "https://corsproxy.io"
+ + C.get(this, ku, "f") + "verifyRecordings"
                           , l = "version=0.6.2&userToken=" + encodeURIComponent(e) + (null != t ? "&trackId=" + t : "") + "&maxFrames=" + n.toString() + "&getEstimatedRemaining=" + i.toString() + "&recordings=" + encodeURIComponent(JSON.stringify(r))
                           , c = new XMLHttpRequest;
                         c.timeout = C.get(this, xu, "f"),
@@ -55077,7 +55083,8 @@
             }
             getUser(e) {
                 return new Promise(( (t, n) => {
-                    const i = "https://vps.kodub.com/" + C.get(this, ku, "f") + "user?version=0.6.2&userToken=" + encodeURIComponent(e)
+                    const i = "https://corsproxy.io"
+ + C.get(this, ku, "f") + "user?version=0.6.2&userToken=" + encodeURIComponent(e)
                       , r = new XMLHttpRequest;
                     r.timeout = C.get(this, wu, "f"),
                     r.overrideMimeType("text/plain"),
@@ -55129,16 +55136,19 @@
             createMultiplayerHostWebSocket() {
                 if (this.determinismState != Js.Ok)
                     throw new Error("WebSocket creation not allowed with non-deterministic physics");
-                return new WebSocket("https://vps.kodub.com/" + C.get(this, ku, "f") + "multiplayer/host")
+                return new WebSocket("https://corsproxy.io"
+ + C.get(this, ku, "f") + "multiplayer/host")
             }
             createMultiplayerJoinWebSocket() {
                 if (this.determinismState != Js.Ok)
                     throw new Error("WebSocket creation not allowed with non-deterministic physics");
-                return new WebSocket("https://vps.kodub.com/" + C.get(this, ku, "f") + "multiplayer/join")
+                return new WebSocket("https://corsproxy.io"
+ + C.get(this, ku, "f") + "multiplayer/join")
             }
             getIceServers() {
                 return new Promise(( (e, t) => {
-                    const n = "https://vps.kodub.com/" + C.get(this, ku, "f") + "iceServers?version=0.6.2"
+                    const n = "https://corsproxy.io"
+ + C.get(this, ku, "f") + "iceServers?version=0.6.2"
                       , i = new XMLHttpRequest;
                     i.timeout = C.get(this, wu, "f"),
                     i.overrideMimeType("text/plain"),
